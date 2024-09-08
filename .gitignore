@@ -1,0 +1,69 @@
+﻿# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Visual Studio
+obj/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+packages/
+target/
+*.pdb
+packages.config
+CMakeSettings.json
+.vscode
+.cache
+
+# XCode
+sideqick.xcworkspace/
+sideqick.xcodeproj/
+build_logs/
+fxbuild/
+.DS_Store
+
+# IntelliJ IDEA
+.idea
+
+# Linux
+Makefile
+sideqick-*.make
+premake-stamp
+cmake-stamp
+/Debug
+*.deb
+
+# CMake
+build/
+cmake-build-*/
+
+# Juce (a submodule should be added)
+libs/juce-*
+*.jucer
