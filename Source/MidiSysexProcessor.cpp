@@ -36,7 +36,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry()
 		Array<MidiMessage> sqEsqMessages;
 
 		// Check if we are connected to an ESQ-1
-		for each (MidiMessage deviceIdMessage in deviceIdMessages) {
+		for (auto deviceIdMessage : deviceIdMessages) {
 			if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
 				const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
 				if (deviceIdData[FAMILY] == SQ_ESQ_FAMILY) {
