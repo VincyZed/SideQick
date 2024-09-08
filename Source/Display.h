@@ -5,7 +5,7 @@
 using namespace juce;
 // For the display's ON and OFF states
 static const Colour DISPLAY_COLOURS[2] = { Colour::fromRGB(0, 255, 220), Colour::fromRGB(0, 128, 110) };
-enum DisplayState { ON, OFF };
+const enum DisplayState { ON, OFF };
 
 class DisplayLookAndFeel : public juce::LookAndFeel_V4 {
 public:
@@ -14,13 +14,14 @@ public:
     DisplayLookAndFeel();
     Typeface::Ptr getCustomTypeface();
     Font getLabelFont(Label& label) override;
-    //Font getPopupMenuFont() override;
+    Font getPopupMenuFont() override;
     void drawComboBox(Graphics& g, int width, int height, bool isButtonDown,
         int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) override;
     void drawToggleButton(Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown) override;
 
 private:
     const Colour DISPLAY_BACK_COLOUR = Colour::fromRGB(6, 0, 10);
+    Typeface::Ptr customTypeface;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DisplayLookAndFeel)
 };

@@ -50,17 +50,19 @@ DisplayLookAndFeel::DisplayLookAndFeel() {
 }
 
 Typeface::Ptr DisplayLookAndFeel::getCustomTypeface() {
-	return Typeface::createSystemTypefaceFor(BinaryData::DSEG14ClassicItalic_ttf, BinaryData::DSEG14ClassicItalic_ttfSize);
+    //return Typeface::createSystemTypefaceFor(BinaryData::DSEG14ClassicItalic_ttf, BinaryData::DSEG14ClassicItalic_ttfSize);
+    if (!customTypeface)
+        customTypeface = juce::Typeface::createSystemTypefaceFor(BinaryData::DSEG14ClassicItalic_ttf, BinaryData::DSEG14ClassicItalic_ttfSize);
+    return customTypeface;
 }
 
 Font DisplayLookAndFeel::getLabelFont(Label& label) {
     return Font(FontOptions(getCustomTypeface()));
 }
 
-// This causes cache overflows and I can't figure out why
-//Font DisplayLookAndFeel::getPopupMenuFont() {
-//    return Font(FontOptions(getCustomTypeface()).withHeight(12.0f));
-//}
+Font DisplayLookAndFeel::getPopupMenuFont() {
+    return Font(FontOptions(getCustomTypeface()).withHeight(12.0f));
+}
 
 void DisplayLookAndFeel::drawComboBox(Graphics& g, int width, int height, bool isButtonDown,
     int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) {
