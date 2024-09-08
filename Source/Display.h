@@ -5,7 +5,7 @@
 using namespace juce;
 // For the display's ON and OFF states
 static const Colour DISPLAY_COLOURS[2] = { Colour::fromRGB(0, 255, 220), Colour::fromRGB(0, 128, 110) };
-const enum DisplayState { ON, OFF };
+enum DisplayState { ON, OFF };
 
 class DisplayLookAndFeel : public juce::LookAndFeel_V4 {
 public:
