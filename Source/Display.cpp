@@ -50,7 +50,6 @@ DisplayLookAndFeel::DisplayLookAndFeel() {
 }
 
 Typeface::Ptr DisplayLookAndFeel::getCustomTypeface() {
-    //return Typeface::createSystemTypefaceFor(BinaryData::DSEG14ClassicItalic_ttf, BinaryData::DSEG14ClassicItalic_ttfSize);
     if (!customTypeface)
         customTypeface = juce::Typeface::createSystemTypefaceFor(BinaryData::DSEG14ClassicItalic_ttf, BinaryData::DSEG14ClassicItalic_ttfSize);
     return customTypeface;
