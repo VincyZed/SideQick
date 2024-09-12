@@ -36,5 +36,6 @@ Changes to the current program are thus applied and directly sent to the synth. 
     - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
 
 # Next on the To Do List:
+- CI/CD (GitHub Actions) to provide a binary
 - Full compatibility with macOS and Linux
 - Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
