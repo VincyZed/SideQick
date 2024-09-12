@@ -1,15 +1,15 @@
  # SideQick
 
-SideQick is a software companion to be used with Ensoniq SQ-80 or ESQ-1 hardware synthesizers. Its purpose is to extend the functionnality of those units, mainly by enabling access to illegal (out of bound) values for some parameters found in these synthesizers.
+SideQick is a software companion to be used with Ensoniq SQ-80 or ESQ-1 hardware synthesizers. Its purpose is to extend the functionnality of those units, mainly by enabling access to illegal (out of bound) values for some parameters found in these synthesizers. This allows for even more possibilities and avenues of sound design exploration.
 
-Note: This project is still a work-in-progress. There are probably still bugs and other small issues to be ironed out.
+Note: This project is still a work-in-progress. There are still bugs and other small issues to be ironed out.
 
 # Features
 
-- As it stands, SideQick provides easy access to illegal value ranges for the following parameters:
-    - Hidden waveforms: especially useful if not using the patched [1.83](http://www.buchty.net/~buchty/sq80/customize.html) SQ-80 or [3.53](http://www.buchty.net/~buchty/esq1/customize.html) ESQ-1 OS.
-    - Oscillator pitch: allows for extreme oscillator pitch settings (OCT +6 and +7, and a whole new Low-Frequency range)
-    - Higher filter resonance: enables filter self-oscillation
+As it stands, SideQick provides easy access to illegal value ranges for the following parameters:
+- Hidden waveforms: especially useful when not using the patched [1.83](http://www.buchty.net/~buchty/sq80/customize.html) SQ-80 or [3.53](http://www.buchty.net/~buchty/esq1/customize.html) ESQ-1 OS.
+- Oscillator pitch: allows for extreme oscillator pitch settings (OCT +6 and +7, and a whole new "Low-Frequency" range)
+- Higher filter resonance: enables filter self-oscillation
 
 
 # About Illegal Parameter Values
@@ -35,5 +35,6 @@ Changes to the current program are thus applied and directly sent to the synth. 
     - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
     - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
 
-# Additional Planned Features:
-- Seamless patch management: Easy to use program/bank request, loading and saving (.syx)
+# Next on the To Do List:
+- Full compatibility with macOS and Linux
+- Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
