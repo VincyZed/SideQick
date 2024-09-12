@@ -1,8 +1,11 @@
  # SideQick
 
+ ![image](https://github.com/user-attachments/assets/476f15c1-da74-4278-9f33-3f358d8b89bc)
+
+
 SideQick is a software companion to be used with Ensoniq SQ-80 or ESQ-1 hardware synthesizers. Its purpose is to extend the functionnality of those units, mainly by enabling access to illegal (out of bound) values for some parameters found in these synthesizers. This allows for even more possibilities and avenues of sound design exploration.
 
-Note: This project is still a work-in-progress. There are still bugs and other small issues to be ironed out.
+**Note**: This project is still a work-in-progress. There are still bugs and other small issues to be ironed out.
 
 # Features
 
@@ -35,7 +38,19 @@ Changes to the current program are thus applied and directly sent to the synth. 
     - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
     - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
 
+# Building SideQick
+Once your environment has all the necessary dependencies, a reliable way to build SideQick on all platforms would be:
+
+```
+git clone https://github.com/VincyZed/SideQick
+cd SideQick
+git submodule update --init --recursive
+cmake -B cmake-build
+cmake --build cmake-build --config Release
+```
+
 # Next on the To Do List:
 - CI/CD (GitHub Actions) to provide a binary
 - Full compatibility with macOS and Linux
+- More documentation about building on different platforms
 - Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
