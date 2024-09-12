@@ -20,7 +20,7 @@ As it stands, SideQick provides easy access to illegal value ranges for the foll
 Upon sending programs to the synth or recalling them, the bounds for some parameter values are not enforced by its operating system. Even though parameter values are contained within a certain range when programming a sound on the unit itself, nothing prevents us from modifying the raw SysEx data of a program to input any value for such parameters, as long as they are within the [internal width allocated to that parameter](http://www.buchty.net/ensoniq/files/manuals/SQ80.pdf#page=214).
 
 While some features are hardware-limited or are linked to deeper restrictions baked in the operating system (such as OSC Sync and AM not being able to be enabled at the same time, a real shame), others are not and are supported by the hardware, such as allowing higher filter resonance values for example.
-Although this is a relatively unknown trick, there are a few demonstrations out there such as [this one](https://www.youtube.com/watch?v=Usa-v3nnpAU) that showcase the result of manually editing illegal parameter values.
+Although this is a relatively unknown trick, there are a few demonstrations out there such as [this one](https://www.youtube.com/watch?v=Usa-v3nnpAU) that showcase the result of manually editing hexadecimal values of a SysEx file to achieve filter self-oscillation.
 
 As a reminder, from a perspective of loading and saving programs into internal memory, on a cartridge or on disk, the operating system will treat parameters with illegal values just like the others. Therefore those illegal values can be included into saved programs and **should be compatible with any SQ-80 or ESQ-1**.
 
