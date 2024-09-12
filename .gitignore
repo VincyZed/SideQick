@@ -36,6 +36,7 @@ obj/
 .vs/
 packages/
 target/
+Builds/
 *.pdb
 packages.config
 CMakeSettings.json
@@ -62,7 +63,13 @@ cmake-stamp
 
 # CMake
 build/
+cmake-build*/
+
+# Juce (a submodule should be added)
+libs/juce-*
+JuceLibraryCode/
 cmake-build-*/
+JUCE/
 
 # Juce (a submodule should be added)
 libs/juce-*
