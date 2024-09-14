@@ -5,6 +5,8 @@ on:
     branches: [ $default-branch ]
   pull_request:
     branches: [ $default-branch ]
+# Add a manual trigger for the workflow
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
