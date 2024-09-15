@@ -35,7 +35,11 @@ jobs:
 
     - name: Generate version number
       id: version
-      run: echo "VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      run: |
+        VERSION=$(date +'%Y%m%d%H%M%S')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "::set-output name=VERSION::$VERSION"
+      shell: bash
 
     - name: Create Pre-Release
       id: create_release
