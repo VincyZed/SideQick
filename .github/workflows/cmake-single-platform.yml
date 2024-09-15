@@ -32,3 +32,28 @@ jobs:
       with:
         name: SideQick.exe
         path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
+
+    - name: Generate version number
+      id: version
+      run: echo "VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+    - name: Create Pre-Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        release_name: "Pre-Release ${{ steps.version.outputs.VERSION }}"
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
+        asset_name: SideQick.exe
+        asset_content_type: application/octet-stream
