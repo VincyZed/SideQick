@@ -35,10 +35,7 @@ jobs:
 
     - name: Generate version number
       id: version
-      run: |
-        VERSION=$(date +'%Y%m%d%H%M%S')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "::set-output name=VERSION::$VERSION"
+      run: echo "VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Pre-Release
@@ -47,8 +44,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.version.outputs.VERSION }}
-        release_name: "Pre-Release ${{ steps.version.outputs.VERSION }}"
+        tag_name: ${{ env.VERSION }}
+        release_name: "Pre-Release ${{ env.VERSION }}"
         draft: false
         prerelease: true
 
