@@ -50,7 +50,7 @@ cmake --build cmake-build --config Release
 ```
 
 # Next on the To Do List:
-- CI/CD (GitHub Actions) to provide a binary
 - Full compatibility with macOS and Linux
+- Provide a binary for macOS and Linux
 - More documentation about building on different platforms
 - Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
