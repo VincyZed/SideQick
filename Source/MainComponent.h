@@ -47,13 +47,13 @@ public:
 
     Logo logo;
     
-    Font descriptionTextFont = Font(FontOptions("Arial", 16.0f, Font::italic));
+    Font descriptionTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic));
     Colour descriptionTextColour = Colour::fromRGB(170, 170, 170);
 
-    Font sectionsTextFont = Font(FontOptions("Arial", 16.0f, Font::bold));
+    Font sectionsTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::bold));
     Colour sectionsTextColour = Colour::fromRGB(255, 255, 225);
 
-    Font menusTextFont = Font(FontOptions("Arial", 16.0f, Font::plain));
+    Font menusTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::plain));
     Colour menusTextColour = Colour::fromRGB(255, 255, 240);
 
     // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
