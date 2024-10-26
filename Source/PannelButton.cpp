@@ -29,7 +29,7 @@ PannelButton::PannelButton(const Colour& color, const String& text, const int& x
 	label.setJustificationType(Justification::centred);
 	label.attachToComponent(this, true);
 	label.setColour(Label::textColourId, buttonTextColour);
-	label.setFont(Font("Arial", 16.0f, Font::italic));
+	label.setFont(Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic)));
 	label.setBounds(xPos - buttonWidth / 2, yPos - 20, 2 * buttonWidth, 0.5 * buttonHeight);
 }
 
