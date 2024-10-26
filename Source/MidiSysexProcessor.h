@@ -40,10 +40,7 @@ private:
 
     Array<MidiMessage> receivedSysExMessages;
 
-    // Delay used to wait for the SQ-80/ESQ-1 to process SysEx messages.
-    // TODO: The delay should be used as a max allowed time to wait for a response,
-    // while we should run a thread that checks if the response has been received instead.
-    const int SYSEX_DELAY = 750;
+    const int SYSEX_DELAY = 800;
     
     // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
     const int FAMILY = 5;

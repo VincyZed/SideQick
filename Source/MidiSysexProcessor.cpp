@@ -81,7 +81,6 @@ MidiMessage MidiSysexProcessor::requestProgramDump()
 		selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_PGM_DUMP_PT_2, sizeof(REQUEST_PGM_DUMP_PT_2)));
 	}
 
-	//TODO: Set up a separate thread to listen for MIDI messages and signal the main thread when a message is received?
 	Thread::sleep(SYSEX_DELAY);
 
 	// Read the incoming SysEx message

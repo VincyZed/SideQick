@@ -39,6 +39,15 @@ Changes to the current program are thus applied and directly sent to the synth. 
     - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
 
 # Building SideQick
+
+## Installing dependencies
+
+### Linux
+On linux, some dependencies are required to be able to build the project. If you're using a Debian-based distribution, you can install them by running this command:
+
+```sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev```
+
+## Compiling
 Once your environment has all the necessary dependencies, a reliable way to build SideQick on all platforms would be:
 
 ```
