@@ -15,6 +15,29 @@
 #include <JuceHeader.h>
 #include "MainComponent.h"
 
+#include <csignal>
+#include <fstream>
+#include <iostream>
+
+static void signalHandler(int signum) {
+#ifdef DEBUG
+    std::ofstream logFile("crash.log", std::ios::out | std::ios::app);
+    if (logFile.is_open()) {
+        logFile << "Signal (" << signum << ") received.\n";
+        logFile << "Stack trace:\n";
+        logFile << juce::SystemStats::getStackBacktrace() << "\n";
+        logFile.close();
+    }
+#endif
+    std::exit(signum);
+}
+
+
+static void registerSignalHandlers() {
+    std::signal(SIGSEGV, signalHandler);
+    std::signal(SIGABRT, signalHandler);
+}
+
 //==============================================================================
 class SideQickApplication  : public juce::JUCEApplication
 {
@@ -29,6 +52,7 @@ public:
     //==============================================================================
     void initialise (const juce::String& commandLine) override
     {
+        registerSignalHandlers();
         mainWindow.reset (new MainWindow (getApplicationName()));
     }
 
