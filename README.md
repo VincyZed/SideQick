@@ -45,7 +45,9 @@ Changes to the current program are thus applied and directly sent to the synth. 
 ### Linux
 On linux, some dependencies are required to be able to build the project. If you're using a Debian-based distribution, you can install them by running this command:
 
-```sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev```
+```
+sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev
+```
 
 ## Compiling
 Once your environment has all the necessary dependencies, a reliable way to build SideQick on all platforms would be:
@@ -59,7 +61,6 @@ cmake --build cmake-build --config Release
 ```
 
 # Next on the To Do List:
-- Full compatibility with macOS and Linux
-- Provide a binary for macOS and Linux
+- Full compatibility with and binary generation for macOS
 - More documentation about building on different platforms
 - Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
