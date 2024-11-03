@@ -54,24 +54,24 @@ jobs:
         libasound2-dev
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build build --config ${{env.BUILD_TYPE}}
 
     - name: Upload binary (Windows)
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: SideQick.exe
-        path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
+        path: build/SideQick_artefacts/Release/SideQick.exe
     
     - name: Upload binary (Linux)
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
         name: SideQick
-        path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick
+        path: build/SideQick_artefacts/Release/SideQick
 
     - name: Generate version number
       id: version
@@ -100,7 +100,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
+        asset_path: build/SideQick_artefacts/Release/SideQick.exe
         asset_name: SideQick.exe
         asset_content_type: application/octet-stream
     
@@ -111,6 +111,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick
+        asset_path: build/SideQick_artefacts/Release/SideQick
         asset_name: SideQick
         asset_content_type: application/octet-stream
