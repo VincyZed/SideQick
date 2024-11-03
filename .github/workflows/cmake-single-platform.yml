@@ -1,23 +1,39 @@
-name: Windows build
+name: SideQick Build
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger
+
+defaults:
+  run:
+    shell: bash
 
 env:
   BUILD_TYPE: Release
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    name: Build - ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: Linux
+            os: ubuntu-latest
+          # - name: macOS
+          #   os: macos-latest
+    
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
         submodules: true
+
     - name: Update submodules
       run: git submodule update --init --recursive
 
@@ -27,19 +43,28 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Upload binary
+    - name: Upload binary (Windows)
+      if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: SideQick.exe
         path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
+    
+    - name: Upload binary (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: SideQick
+        path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick
 
     - name: Generate version number
       id: version
       run: |
-        VERSION=$(date +'%Y%m%d%H%M%S')
+        DATE=$(date +'%Y-%m-%d')
+        BUILD_ID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
+        VERSION="${DATE}-${BUILD_ID}"
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Create Pre-Release
       id: create_release
@@ -52,7 +77,8 @@ jobs:
         draft: false
         prerelease: true
 
-    - name: Upload Release Asset
+    - name: Upload Release Asset (Windows)
+      if: matrix.os == 'windows-latest'
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -60,4 +86,15 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick.exe
         asset_name: SideQick.exe
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Release Asset (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/build/SideQick_artefacts/Release/SideQick
+        asset_name: SideQick
         asset_content_type: application/octet-stream
