@@ -95,9 +95,7 @@ jobs:
     - name: Generate version number
       id: version
       run: |
-        DATE=$(date +'%Y-%m-%d')
-        BUILD_ID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
-        VERSION="${DATE}-${BUILD_ID}"
+        VERSION=$(date +'%Y%m%d%H%M%S')
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       shell: bash
