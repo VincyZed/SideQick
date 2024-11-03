@@ -46,7 +46,7 @@ Changes to the current program are thus applied and directly sent to the synth. 
 On linux, some dependencies are required to be able to build the project. If you're using a Debian-based distribution, you can install them by running this command:
 
 ```
-sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev
+sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev
 ```
 
 ## Compiling
