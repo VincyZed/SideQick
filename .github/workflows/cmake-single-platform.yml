@@ -103,11 +103,14 @@ jobs:
 
     - name: Generate version number
       id: version
+      shell: bash
       run: |
-        VERSION=$(date +'%Y%m%d%H%M%S')
+        DATE=$(date +'%Y-%m-%d')
+        BUILD_ID=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 5)
+        VERSION="${DATE}-${BUILD_ID}"
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-      shell: bash
+      
 
     - name: Create Pre-Release
       id: create_release
