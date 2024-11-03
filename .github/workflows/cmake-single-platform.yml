@@ -1,4 +1,4 @@
-name: SideQick Build
+name: SideQick
 
 on:
   push:
@@ -34,12 +34,12 @@ jobs:
       with:
         submodules: true
 
-        
+
     - name: Update submodules
       run: git submodule update --init --recursive
 
 
-    - name: Install dependencies
+    - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
@@ -101,8 +101,6 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       shell: bash
-      env:
-        BUILD_TYPE: Release
 
 
     - name: Create Pre-Release
