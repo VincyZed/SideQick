@@ -41,8 +41,8 @@ void PlasticTexture::resized() {
 //==============================================================================
 MainComponent::MainComponent()
 	: refreshButton(refreshButtonColours[getCurrentSynthModel()], "Refresh", 640, 130),
-	currentModel(UNKNOWN), tooltipWindow(this, 1500)
-{
+	currentModel(UNKNOWN), tooltipWindow(this, 1500) {
+
 	// Set the look and feel, plastic texture and logo
 
 	auto customLookAndFeel = std::make_unique<DisplayLookAndFeel>();
@@ -444,8 +444,8 @@ MainComponent::MainComponent()
 	startTimer(500);
 }
 
-MainComponent::~MainComponent()
-{
+MainComponent::~MainComponent() {
+
 	if (midiProcessor.selectedMidiIn)
 		midiProcessor.selectedMidiIn->stop();
 
@@ -459,8 +459,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill
 void MainComponent::releaseResources(){}
 //==============================================================================
 
-void MainComponent::paint(Graphics& g)
-{
+void MainComponent::paint(Graphics& g) {
 	g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0,
 		backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : 
 		selectedThemeOption - 1][1], (float)(windowWidth / 2), (float)windowHeight, true));
@@ -482,17 +481,16 @@ void MainComponent::paint(Graphics& g)
 	
 }
 
-void MainComponent::resized()
-{}
+void MainComponent::resized() {}
 
-void MainComponent::mouseDown(const juce::MouseEvent& event)
-{
+void MainComponent::mouseDown(const juce::MouseEvent& event) {
+
 	if (event.mods.isRightButtonDown())
 		showContextMenu();
 }
 
-void MainComponent::showContextMenu()
-{
+void MainComponent::showContextMenu() {
+
 	// Create a menu
 	PopupMenu menu;
 	PopupMenu themeSubMenu;
@@ -527,14 +525,14 @@ void MainComponent::showContextMenu()
 	});
 }
 
-void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message)
-{
+void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message) {
+
 	midiProcessor.processIncomingMidiData(source, message);
 }
 
 
-void MainComponent::updateStatus(DeviceResponse response)
-{
+void MainComponent::updateStatus(DeviceResponse response) {
+
 	if (response.status == STATUS_MESSAGES[CONNECTED]) {
 		statusLabel.setText(STATUS_MESSAGES[CONNECTED] + "    to    ", NO);
 
