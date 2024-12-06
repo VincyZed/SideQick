@@ -23,8 +23,8 @@ jobs:
             os: windows-latest
           - name: Linux
             os: ubuntu-latest
-          # - name: macOS
-          #   os: macos-latest
+          - name: macOS
+            os: macos-latest
     
     steps:
     - name: Checkout code
@@ -62,8 +62,8 @@ jobs:
       run: |
         powershell Compress-Archive -Path build/SideQick_artefacts/Release/SideQick.exe -DestinationPath build/SideQick_artefacts/Release/SideQick-win64.zip
 
-    - name: Zip binary (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Zip binary (mac OS and Linux)
+      if: matrix.os != 'windows-latest'
       run: |
         zip -j build/SideQick_artefacts/Release/SideQick-linux.zip build/SideQick_artefacts/Release/SideQick
 
@@ -74,8 +74,8 @@ jobs:
         name: SideQick-win64.zip
         path: build/SideQick_artefacts/Release/SideQick-win64.zip
     
-    - name: Upload binary (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Upload binary (macOS and Linux)
+      if: matrix.os != 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: SideQick-linux.zip
