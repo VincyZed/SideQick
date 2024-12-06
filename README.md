@@ -33,10 +33,13 @@ Changes to the current program are thus applied and directly sent to the synth. 
 
 
 # Requirements
-- A Windows computer (no thorough testing has been done yet for macOS and Linux. Theoretically it should/could work, but I'm still sorting out some issues. More to come...);
-- An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer bidirectionaly;
+- A Windows or Linux computer (no testing has been done yet for macOS. Theoretically it should/could work, but I'm still sorting out some issues. More to come...);
+- An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer **bidirectionaly**;
     - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
     - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
+
+# Troubleshooting
+If you run SideQick on Windows and get error messages about missing DLLs, you probably have this issue and simply need to install [this](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
 
 # Building SideQick
 
@@ -49,7 +52,7 @@ On linux, some dependencies are required to be able to build the project. If you
 sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev libasound2-dev
 ```
 
-## Compiling
+## Building with CMake
 Once your environment has all the necessary dependencies, a reliable way to build SideQick on all platforms would be:
 
 ```
