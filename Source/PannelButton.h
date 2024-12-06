@@ -18,27 +18,24 @@
 
 using namespace juce;
 
-class PannelButton : public ShapeButton
-{
-public:
+class PannelButton : public ShapeButton {
+  public:
+    NotificationType NO = NotificationType::dontSendNotification;
 
-	NotificationType NO = NotificationType::dontSendNotification;
-		
-	float buttonWidth = 40.0f;
-	float buttonHeight = 25.0f;
-	float cornerSize = 3.0f;
+    float buttonWidth = 40.0f;
+    float buttonHeight = 25.0f;
+    float cornerSize = 3.0f;
 
-	Colour buttonTextColour = Colour::fromRGB(192, 192, 192);
+    Colour buttonTextColour = Colour::fromRGB(192, 192, 192);
 
-	PannelButton(const Colour& color, const String& text, const int& xPos, const int& yPos);
-	PannelButton();
-	~PannelButton() override;
-	void paint(Graphics& g) override;
-	void changeColour(const Colour& newColour);
+    PannelButton(const Colour& color, const String& text, const int& xPos, const int& yPos);
+    PannelButton();
+    ~PannelButton() override;
+    void paint(Graphics& g) override;
+    void changeColour(const Colour& newColour);
 
-private:
-	Label label;
-	DropShadow shadow;
-	Path buttonShape;
-
+  private:
+    Label label;
+    DropShadow shadow;
+    Path buttonShape;
 };

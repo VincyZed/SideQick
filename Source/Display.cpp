@@ -16,13 +16,9 @@
 
 using namespace juce;
 
-Display::Display() {
-    setLookAndFeel(&displayLookAndFeel);
-}
+Display::Display() { setLookAndFeel(&displayLookAndFeel); }
 
-Display::~Display() {
-    setLookAndFeel(nullptr);
-}
+Display::~Display() { setLookAndFeel(nullptr); }
 
 void Display::paint(Graphics& g) {
     float cornerRadius = 8.0f;
@@ -69,16 +65,11 @@ Typeface::Ptr DisplayLookAndFeel::getCustomTypeface() {
     return customTypeface;
 }
 
-Font DisplayLookAndFeel::getLabelFont(Label& label) {
-    return Font(FontOptions(getCustomTypeface()));
-}
+Font DisplayLookAndFeel::getLabelFont(Label& label) { return Font(FontOptions(getCustomTypeface())); }
 
-Font DisplayLookAndFeel::getPopupMenuFont() {
-    return Font(FontOptions(getCustomTypeface()).withHeight(12.0f));
-}
+Font DisplayLookAndFeel::getPopupMenuFont() { return Font(FontOptions(getCustomTypeface()).withHeight(12.0f)); }
 
-void DisplayLookAndFeel::drawComboBox(Graphics& g, int width, int height, bool isButtonDown,
-    int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) {
+void DisplayLookAndFeel::drawComboBox(Graphics& g, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) {
     // Draw the background
     g.setColour(box.findColour(ComboBox::backgroundColourId));
     g.fillRect(0, 0, width, height);
