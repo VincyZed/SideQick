@@ -14,29 +14,28 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-#include "MidiSysexProcessor.h"
 #include "Display.h"
-#include "PannelButton.h"
 #include "Logo.h"
+#include "MidiSysexProcessor.h"
+#include "PannelButton.h"
+#include <JuceHeader.h>
 
 using namespace juce;
 
 class PlasticTexture : public Component {
-public:
+  public:
     PlasticTexture(const Image& textureImage);
 
     void paint(Graphics& g) override;
     void resized() override;
 
-private:
+  private:
     juce::Image textureImage;
     std::unique_ptr<PlasticTexture> overlayComponent;
 };
 
-class MainComponent  : public AudioAppComponent, public MidiInputCallback, public Timer
-{
-public:
+class MainComponent : public AudioAppComponent, public MidiInputCallback, public Timer {
+  public:
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
@@ -46,7 +45,7 @@ public:
     std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
 
     Logo logo;
-    
+
     Font descriptionTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic));
     Colour descriptionTextColour = Colour::fromRGB(170, 170, 170);
 
@@ -57,16 +56,12 @@ public:
     Colour menusTextColour = Colour::fromRGB(255, 255, 240);
 
     // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
-    const Colour backgroundColours[3][2] = {
-        { Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65) },
-        { Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55) },
-        { Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60) }
-    };
-    const Colour accentColours[3] = { Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175) };
-    const Colour refreshButtonColours [3] = { Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175) };
-    const Colour importButtonColours [3] = { Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55) };
-    const Colour exportButtonColours [3] = { Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175) };
-    
+    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)}, {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)}, {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
+    const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
+    const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
+    const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};
+    const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
+
     const float separatorThickness = 10.0f;
 
     enum ThemeOptions { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
@@ -81,20 +76,20 @@ public:
     void timerCallback() override;
     SynthModel getCurrentSynthModel() const;
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
     //==============================================================================
-    void paint (Graphics& g) override;
+    void paint(Graphics& g) override;
     void resized() override;
 
     SynthModel currentModel;
 
     enum Oscillators { OSC1, OSC2, OSC3 };
 
-    //Array<MidiDeviceInfo> midiInDevices;
-    //Array<MidiDeviceInfo> midiOutDevices;
+    // Array<MidiDeviceInfo> midiInDevices;
+    // Array<MidiDeviceInfo> midiOutDevices;
 
     StringArray midiInDeviceNames;
     StringArray midiOutDeviceNames;
@@ -102,7 +97,6 @@ public:
     Label descriptionLabel;
 
     Label midiSectionLabel;
-
 
     Label midiInLabel;
     Label midiOutLabel;
@@ -131,17 +125,15 @@ public:
     Label LFLabel;
     Label selfOscLabel;
 
-
     Display display;
 
     GroupComponent midiControls;
-    
+
     // Contains the programControls and the labels
     GroupComponent programSection;
     GroupComponent programControls;
     // The top row of the display
     GroupComponent statusSection;
-
 
     StringArray waveMenuOpts;
     ComboBox osc1WaveMenu;
@@ -161,12 +153,10 @@ public:
 
     void mouseDown(const juce::MouseEvent& event) override;
 
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
-
-private:
-
-    const StringArray ignoredMidiDevices = { "Microsoft GS Wavetable Synth" };
+  private:
+    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
     TooltipWindow tooltipWindow;
 
     std::unique_ptr<PlasticTexture> textureOverlay;
@@ -179,4 +169,3 @@ private:
     unsigned int displayWidth = 780;
     unsigned int displayHeight = 200;
 };
-

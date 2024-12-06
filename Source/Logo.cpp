@@ -13,6 +13,7 @@
  */
 
 #include "Logo.h"
+#include <BinaryData.h>
 
 using namespace juce;
 
