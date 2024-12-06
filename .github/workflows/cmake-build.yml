@@ -65,7 +65,8 @@ jobs:
     - name: Zip binary (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        zip -r build/SideQick_artefacts/Release/SideQick-macOS.zip build/SideQick_artefacts/Release/SideQick.app
+        cd build/SideQick_artefacts/Release/
+        zip -r SideQick-macOS.zip SideQick.app
 
     - name: Zip binary (Linux)
       if: matrix.os == 'ubuntu-latest'
