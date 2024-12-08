@@ -199,9 +199,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     // Menu to select the OSC1 wave
     osc1WaveMenu.setBounds(90, 100, 230, 25);
-    osc1WaveMenu.setTooltip("Waveform for oscillator 1:\nStarts with normal waveforms, then goes "
-                            "into hidden waveforms if supported.");
-  
+    osc1WaveMenu.setTooltip("Waveform for oscillator 1:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
     programControls.addAndMakeVisible(osc1WaveMenu);
     osc1WaveMenu.onChange = [this] {
         updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
@@ -215,9 +213,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     osc2WaveMenu.addItemList(waveMenuOpts, 1);
     osc2WaveMenu.setBounds(90, 130, 230, 25);
     osc2WaveMenu.setSelectedItemIndex(0, NO);
-    osc2WaveMenu.setTooltip("Waveform for oscillator 2:\nStarts with normal waveforms, then goes "
-                            "into hidden waveforms if supported.");
-
+    osc2WaveMenu.setTooltip("Waveform for oscillator 2:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
     programControls.addAndMakeVisible(osc2WaveMenu);
     osc2WaveMenu.onChange = [this] {
         updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
@@ -231,9 +227,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     osc3WaveMenu.addItemList(waveMenuOpts, 1);
     osc3WaveMenu.setBounds(90, 160, 230, 25);
     osc3WaveMenu.setSelectedItemIndex(0, NO);
-    osc3WaveMenu.setTooltip("Waveform for oscillator 3:\nStarts with normal waveforms, then goes "
-                            "into hidden waveforms if supported.");
-
+    osc3WaveMenu.setTooltip("Waveform for oscillator 3:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
     programControls.addAndMakeVisible(osc3WaveMenu);
     osc3WaveMenu.onChange = [this] {
         updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
@@ -334,9 +328,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     // Button to toggle OSC1 low-frequency range
     osc1LFButton.setBounds(570, 102, 20, 20);
-    osc1LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a "
-                            "couple of octaves for oscillator 1 when enabled.");
-
+    osc1LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 1 when enabled.");
     programControls.addAndMakeVisible(osc1LFButton);
     osc1LFButton.onClick = [this] {
         updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
@@ -349,9 +341,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     // Button to toggle OSC2 low-frequency range
     osc2LFButton.setBounds(570, 132, 20, 20);
-    osc2LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a "
-                            "couple of octaves for oscillator 2 when enabled.");
-
+    osc2LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 2 when enabled.");
     programControls.addAndMakeVisible(osc2LFButton);
     osc2LFButton.onClick = [this] {
         updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
@@ -364,9 +354,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     // Button to toggle OSC3 low-frequency range
     osc3LFButton.setBounds(570, 162, 20, 20);
-    osc3LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a "
-                            "couple of octaves for oscillator 3 when enabled.");
-
+    osc3LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 3 when enabled.");
     programControls.addAndMakeVisible(osc3LFButton);
     osc3LFButton.onClick = [this] {
         ;
@@ -386,9 +374,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     programSection.addAndMakeVisible(selfOscLabel);
 
     selfOscButton.setBounds(680, 130, 20, 20);
-    selfOscButton.setTooltip("Filter self-oscillation:\nShifts the whole resonance range "
-                             "internally up to 32-63 when enabled.");
-
+    selfOscButton.setTooltip("Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.");
     programControls.addAndMakeVisible(selfOscButton);
 
     selfOscButton.onClick = [this] {
@@ -502,13 +488,11 @@ void MainComponent::showContextMenu() {
         if (result == 2) {
             AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
                                              "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion 0.43\n\nCopyright Vincent Zauhar, "
-                                             "2024\nReleased under the GNU GPL v3 "
-                                             "license\n\nhttps://github.com/VincyZed/SideQick");
+                                             "2024\nReleased under the GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
     });
 }
-
 
 void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message) { midiProcessor.processIncomingMidiData(source, message); }
 
