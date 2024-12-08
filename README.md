@@ -7,12 +7,28 @@ SideQick is a software companion to be used with Ensoniq SQ-80 or ESQ-1 hardware
 
 **Note**: This project is still a work-in-progress. There are still bugs and other small issues to be ironed out.
 
+# Downloads
+
+Downloads for Windows, macOS (experimental) and Linux are available from the [Releases page](https://github.com/VincyZed/SideQick/tags).
+
+
 # Features
 
 As it stands, SideQick provides easy access to illegal value ranges for the following parameters:
 - Hidden waveforms: especially useful when not using the patched [1.83](http://www.buchty.net/~buchty/sq80/customize.html) SQ-80 or [3.53](http://www.buchty.net/~buchty/esq1/customize.html) ESQ-1 OS.
 - Oscillator pitch: allows for extreme oscillator pitch settings (OCT +6 and +7, and a whole new "Low-Frequency" range)
 - Higher filter resonance: enables filter self-oscillation
+
+
+# Requirements
+- A Windows or Linux computer (no testing has been done yet for macOS. Theoretically it should/could work, but I'm still sorting out some issues. More to come...);
+- An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer **bidirectionaly**;
+    - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
+    - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
+
+ 
+# Troubleshooting
+If you run SideQick on Windows and get error messages about missing DLLs, you probably have this issue and simply need to install [this](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
 
 
 # About Illegal Parameter Values
@@ -31,15 +47,6 @@ SideQick is a C++ standalone application made with the [JUCE](https://juce.com/)
 
 Changes to the current program are thus applied and directly sent to the synth. To achieve this, when clicking on an option in SideQick, the program being currently edited will be requested by the computer by sending a [Current Program Dump Request](http://www.buchty.net/ensoniq/files/manuals/SQ80.pdf#page=204) SysEx message. Once the SysEx response containing the program is received, changes to the program data are made accordingly to the selected option, then the resulting program is sent back to the SQ-80 / ESQ-1.
 
-
-# Requirements
-- A Windows or Linux computer (no testing has been done yet for macOS. Theoretically it should/could work, but I'm still sorting out some issues. More to come...);
-- An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer **bidirectionaly**;
-    - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
-    - On the ESQ-1, OS version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
-
-# Troubleshooting
-If you run SideQick on Windows and get error messages about missing DLLs, you probably have this issue and simply need to install [this](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
 
 # Building SideQick
 
@@ -64,6 +71,4 @@ cmake --build cmake-build --config Release
 ```
 
 # Next on the To Do List:
-- Full compatibility with and binary generation for macOS
-- More documentation about building on different platforms
 - Seamless patch management: Implementation of easy program/bank request, loading and saving (.syx)
