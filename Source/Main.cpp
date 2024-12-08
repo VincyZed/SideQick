@@ -69,7 +69,9 @@ class SideQickApplication : public juce::JUCEApplication {
     */
     class MainWindow : public juce::DocumentWindow {
       public:
-        MainWindow(juce::String name) : DocumentWindow(name, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), DocumentWindow::closeButton | DocumentWindow::minimiseButton) {
+        MainWindow(juce::String name)
+            : DocumentWindow(name, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
+                             DocumentWindow::closeButton | DocumentWindow::minimiseButton) {
             setUsingNativeTitleBar(true);
             setContentOwned(new MainComponent(), true);
 
