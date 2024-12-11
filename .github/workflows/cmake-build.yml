@@ -3,6 +3,9 @@ name: SideQick Build
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Assets/**'
+      - 'Source/**'
   workflow_dispatch: # Allows manual trigger
 
 defaults:
