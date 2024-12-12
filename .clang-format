@@ -8,4 +8,5 @@ BreakBeforeBraces: Attach
 BreakAfterEnumValue: false
 ColumnLimit: 300
 IndentWidth: 4
+MaxEmptyLinesToKeep: 10
 PointerAlignment: Left

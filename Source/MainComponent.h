@@ -39,12 +39,51 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
-    // No notification
+
+
+  private:
+    void handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message) override;
+    void updateStatus(DeviceResponse response);
+    void attemptConnection();
+    void refreshMidiDevices(bool allowMenuSwitch = false);
+    void updateTheme();
+    void timerCallback() override;
+    SynthModel getCurrentSynthModel() const;
+    //==============================================================================
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) override;
+    void releaseResources() override;
+
+    //==============================================================================
+    void paint(Graphics& g) override;
+    void resized() override;
+
+    void showContextMenu();
+    void mouseDown(const juce::MouseEvent& event) override;
+
+    unsigned int windowWidth = 830;
+    unsigned int windowHeight = 410;
+
+    unsigned int displayWidth = 780;
+    unsigned int displayHeight = 200;
+
     NotificationType NO = NotificationType::dontSendNotification;
 
     std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
-
     Logo logo;
+    TooltipWindow tooltipWindow;
+    std::unique_ptr<PlasticTexture> textureOverlay;
+
+    enum ThemeOptions { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
+    unsigned int selectedThemeOption = AUTOMATIC_THEME;
+
+    MidiSysexProcessor midiProcessor;
+    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
+
+
+    SynthModel currentModel;
+    enum Oscillators { OSC1, OSC2, OSC3 };
+
 
     Font descriptionTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic));
     Colour descriptionTextColour = Colour::fromRGB(170, 170, 170);
@@ -63,33 +102,6 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
 
     const float separatorThickness = 10.0f;
-
-    enum ThemeOptions { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
-    unsigned int selectedThemeOption = AUTOMATIC_THEME;
-
-    MidiSysexProcessor midiProcessor;
-    void handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message) override;
-    void updateStatus(DeviceResponse response);
-    void attemptConnection();
-    void refreshMidiDevices(bool allowMenuSwitch = false);
-    void updateTheme();
-    void timerCallback() override;
-    SynthModel getCurrentSynthModel() const;
-    //==============================================================================
-    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) override;
-    void releaseResources() override;
-
-    //==============================================================================
-    void paint(Graphics& g) override;
-    void resized() override;
-
-    SynthModel currentModel;
-
-    enum Oscillators { OSC1, OSC2, OSC3 };
-
-    // Array<MidiDeviceInfo> midiInDevices;
-    // Array<MidiDeviceInfo> midiOutDevices;
 
     StringArray midiInDeviceNames;
     StringArray midiOutDeviceNames;
@@ -151,21 +163,6 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     ToggleButton selfOscButton;
 
-    void mouseDown(const juce::MouseEvent& event) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
-
-  private:
-    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
-    TooltipWindow tooltipWindow;
-
-    std::unique_ptr<PlasticTexture> textureOverlay;
-
-    void showContextMenu();
-
-    unsigned int windowWidth = 830;
-    unsigned int windowHeight = 410;
-
-    unsigned int displayWidth = 780;
-    unsigned int displayHeight = 200;
 };
