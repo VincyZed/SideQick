@@ -55,57 +55,23 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     addAndMakeVisible(logo);
 
     // ========================= Sections labels =========================
-    descriptionLabel.setBounds(25, 145, 395, 20);
-    descriptionLabel.setText("SQ-80 / ESQ-1 expansion software", NO);
-    descriptionLabel.setFont(descriptionTextFont);
-    descriptionLabel.setColour(Label::textColourId, descriptionTextColour);
-    addAndMakeVisible(descriptionLabel);
 
-    midiSectionLabel.setBounds(400, 150, 50, 30);
-    midiSectionLabel.setText("Midi", NO);
-    midiSectionLabel.setFont(sectionsTextFont);
-    midiSectionLabel.setColour(Label::textColourId, sectionsTextColour);
-    addAndMakeVisible(midiSectionLabel);
-
-    midiInLabel.setBounds(400, 20, 200, 30);
-    midiInLabel.setText("Input device :", NO);
-    midiInLabel.setFont(menusTextFont);
-    midiInLabel.setColour(Label::textColourId, menusTextColour);
-    addAndMakeVisible(midiInLabel);
-
-    midiOutLabel.setBounds(400, 55, 200, 30);
-    midiOutLabel.setText("Output device :", NO);
-    midiOutLabel.setFont(menusTextFont);
-    midiOutLabel.setColour(Label::textColourId, menusTextColour);
-    addAndMakeVisible(midiOutLabel);
+    createLabel(descriptionLabel, *this, "SQ-80 / ESQ-1 expansion software", 25, 145, 395, 20, descriptionTextColour, descriptionTextFont);
+    createLabel(midiSectionLabel, *this, "Midi", 400, 150, 50, 30, sectionsTextColour, sectionsTextFont);
+    createLabel(midiInLabel, *this, "Input device :", 400, 20, 200, 30, menusTextColour, menusTextFont);
+    createLabel(midiOutLabel, *this, "Output device :", 400, 55, 200, 30, menusTextColour, menusTextFont);
 
     // ==================== Program Name =====================
-    programTitleLabel.setBounds(10, 5, 395, 30);
-    programTitleLabel.setText("Current   Program   =", NO);
+    // createLabel(programTitleLabel, programControls, "Current   Program   =", 10, 5, 395, 30);
+    // createLabel(programNameLabel, programControls, "______", 210, 5, 300, 30);
+    // ==================== Status Section =====================
 
-    programNameLabel.setBounds(210, 5, 300, 30);
-    programNameLabel.setText("______", NO);
+    createLabel(statusTitleLabel, statusSection, "5tatu5    =", 398, 5, 250, 30);
+    createLabel(statusLabel, statusSection, "Di5connected", 560, 5, 300, 30);
+    createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
+    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
+    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
 
-    // ==================== MIDI Section =====================
-
-    statusTitleLabel.setBounds(398, 5, 250, 30);
-    statusTitleLabel.setText("5tatu5    =", NO);
-    statusSection.addAndMakeVisible(statusTitleLabel);
-
-    statusLabel.setBounds(560, 5, 300, 30);
-    statusLabel.setText("Di5connected", NO);
-    statusSection.addAndMakeVisible(statusLabel);
-
-    modelLabel.setBounds(580, 5, 300, 30);
-    modelLabel.setText("", NO);
-    statusSection.addChildComponent(modelLabel);
-
-    disconnectedUnderline.setBounds(560, 10, 300, 30);
-    disconnectedUnderline.setText("____________", NO);
-    statusSection.addChildComponent(disconnectedUnderline);
-    sysexDisabledUnderline.setBounds(500, 10, 300, 30);
-    sysexDisabledUnderline.setText("_______________________", NO);
-    statusSection.addChildComponent(sysexDisabledUnderline);
 
     refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
     refreshButton.onClick = [this] {
@@ -159,43 +125,19 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     midiControls.setBounds(0, 0, windowWidth, windowHeight);
 
-    // ========================== Illegal parameter values controls ==========================
+    // ========================== Display elements ==========================
+
+    // --------------------------- Labels ---------------------------
+    createLabel(osc1Label, programSection, "O5C 1", 10, 100, 125, 25);
+    createLabel(osc2Label, programSection, "O5C 2", 10, 130, 125, 25);
+    createLabel(osc3Label, programSection, "O5C 3", 10, 160, 125, 25);
+    createLabel(waveLabel, programSection, "WAVEFORM", 90, 70, 125, 25);
+    createLabel(octLabel, programSection, "OCT", 350, 70, 125, 25);
+    createLabel(semiLabel, programSection, "5EMI", 480, 70, 125, 25);
+    createLabel(LFLabel, programSection, "LF", 565, 70, 125, 25);
+    createLabel(selfOscLabel, programSection, "Filt    5elf-O5c", 610, 102, 250, 20);
 
     // ------------------ OSC Octaves and semitones ------------------
-
-    // Label for the OSC1
-    osc1Label.setBounds(10, 100, 125, 25);
-    osc1Label.setText("O5C 1", NO);
-    programSection.addAndMakeVisible(osc1Label);
-
-    // Label for the OSC2
-    osc2Label.setBounds(10, 130, 125, 25);
-    osc2Label.setText("O5C 2", NO);
-    programSection.addAndMakeVisible(osc2Label);
-
-    // Label for the OSC3
-    osc3Label.setBounds(10, 160, 125, 25);
-    osc3Label.setText("O5C 3", NO);
-    programSection.addAndMakeVisible(osc3Label);
-
-    // Label for the wave column
-    waveLabel.setBounds(90, 70, 125, 25);
-    waveLabel.setText("WAVEFORM", NO);
-    programSection.addAndMakeVisible(waveLabel);
-
-    // Label for the octave column
-    octLabel.setBounds(350, 70, 125, 25);
-    octLabel.setText("OCT", NO);
-    programSection.addAndMakeVisible(octLabel);
-
-    // Label for the semitone column
-    semiLabel.setBounds(480, 70, 125, 25);
-    semiLabel.setText("5EMI", NO);
-    programSection.addAndMakeVisible(semiLabel);
-
-    LFLabel.setBounds(565, 70, 125, 25);
-    LFLabel.setText("LF", NO);
-    programSection.addAndMakeVisible(LFLabel);
 
     // Menu to select the OSC1 wave
     osc1WaveMenu.setBounds(90, 100, 230, 25);
@@ -368,11 +310,8 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     // ------------------ Filter self-oscillation ------------------
 
-    // Button to toggle self-oscillation
-    selfOscLabel.setBounds(610, 102, 250, 20);
-    selfOscLabel.setText("Filt    5elf-Osc", NO);
-    programSection.addAndMakeVisible(selfOscLabel);
 
+    // Button to toggle self-oscillation
     selfOscButton.setBounds(680, 130, 20, 20);
     selfOscButton.setTooltip("Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.");
     programControls.addAndMakeVisible(selfOscButton);
@@ -658,4 +597,21 @@ SynthModel MainComponent::getCurrentSynthModel() const {
         return ESQ1;
     else
         return UNKNOWN;
+}
+
+void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour = Colour(), const Font& font = Font()) {
+    label.setBounds(x, y, width, height);
+    label.setText(text, NO);
+    label.setFont(font);
+    if (colour != Colour())
+        label.setColour(Label::textColourId, colour);
+    parent.addAndMakeVisible(label);
+}
+
+void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const String& text, const int x, const int y, const int width, const int height, const StringArray& items, const String& tooltip) {
+    comboBox.setBounds(x, y, width, height);
+    comboBox.setText(text);
+    comboBox.addItemList(items, 1);
+    comboBox.setTooltip(tooltip);
+    parent.addAndMakeVisible(comboBox);
 }

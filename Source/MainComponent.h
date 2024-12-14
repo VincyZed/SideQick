@@ -61,6 +61,9 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     void showContextMenu();
     void mouseDown(const juce::MouseEvent& event) override;
 
+    void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour, const Font& font);
+    void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const String& text, const int x, const int y, const int width, const int height, const StringArray& items, const String& tooltip);
+
     unsigned int windowWidth = 830;
     unsigned int windowHeight = 410;
 
@@ -141,7 +144,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     GroupComponent midiControls;
 
-    // Contains the programControls and the labels
+    // The programSection contains both the programControls and the labels
     GroupComponent programSection;
     GroupComponent programControls;
     // The top row of the display
