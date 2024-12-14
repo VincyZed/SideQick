@@ -64,10 +64,9 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour = Colour(), const Font& font = Font());
 
     void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items = {});
-    void MainComponent::programComboBoxOnChange(const std::function<DeviceResponse()>& onChangeFunc);
+    void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc);
 
     void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onClickFunc);
-    void MainComponent::programButtonOnClick(const std::function<DeviceResponse()>& onClickFunc);
 
     unsigned int windowWidth = 830;
     unsigned int windowHeight = 410;

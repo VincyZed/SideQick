@@ -465,28 +465,20 @@ void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const 
     comboBox.setBounds(x, y, width, height);
     comboBox.setTooltip(tooltip);
     parent.addAndMakeVisible(comboBox);
-    comboBox.onChange = [this, onChangeFunc] { programComboBoxOnChange(onChangeFunc); };
-}
-
-void MainComponent::programComboBoxOnChange(const std::function<DeviceResponse()>& onChangeFunc) {
-    updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-    Thread::launch([this, &onChangeFunc] {
-        DeviceResponse status = onChangeFunc();
-        MessageManager::callAsync([this, status] { updateStatus(status); });
-    });
+    comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
 }
 
 void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onClickFunc) {
     button.setBounds(x, y, width, height);
     button.setTooltip(tooltip);
     parent.addAndMakeVisible(button);
-    button.onClick = [this, onClickFunc] { programButtonOnClick(onClickFunc); };
+    button.onClick = [this, onClickFunc] { displayControlOnChange(onClickFunc); };
 }
 
-void MainComponent::programButtonOnClick(const std::function<DeviceResponse()>& onClickFunc) {
+void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc) {
     updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-    Thread::launch([this, &onClickFunc] {
-        DeviceResponse status = onClickFunc();
+    Thread::launch([this, &onChangeFunc] {
+        DeviceResponse status = onChangeFunc();
         MessageManager::callAsync([this, status] { updateStatus(status); });
     });
 }
