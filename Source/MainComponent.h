@@ -61,12 +61,15 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     void showContextMenu();
     void mouseDown(const juce::MouseEvent& event) override;
 
-    void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour = Colour(), const Font& font = Font());
+    void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height,
+                                    const Colour& colour = Colour(), const Font& font = Font());
 
-    void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items = {});
+    void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                       const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items = {});
     void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc);
 
-    void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onClickFunc);
+    void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                           const std::function<DeviceResponse()>& onClickFunc);
 
     unsigned int windowWidth = 830;
     unsigned int windowHeight = 410;
@@ -102,7 +105,9 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     Colour menusTextColour = Colour::fromRGB(255, 255, 240);
 
     // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
-    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)}, {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)}, {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
+    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
+                                            {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
+                                            {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
     const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
     const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
     const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};

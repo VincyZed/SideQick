@@ -142,38 +142,61 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     const StringArray OSC_OCTAVE_MENU_OPTIONS = {"-3   to   +5", "+6", "+7"};
 
-    createComboBox(osc1WaveMenu, programControls, 90, 100, 230, 25, "Waveform for oscillator 1:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
+    createComboBox(osc1WaveMenu, programControls, 90, 100, 230, 25,
+                   "Waveform for oscillator 1:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
                    [this] { return midiProcessor.changeOscWaveform(OSC1, osc1WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1); });
-    createComboBox(osc2WaveMenu, programControls, 90, 130, 230, 25, "Waveform for oscillator 2:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
+    createComboBox(osc2WaveMenu, programControls, 90, 130, 230, 25,
+                   "Waveform for oscillator 2:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
                    [this] { return midiProcessor.changeOscWaveform(OSC2, osc2WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1); });
-    createComboBox(osc3WaveMenu, programControls, 90, 160, 230, 25, "Waveform for oscillator 3:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
+    createComboBox(osc3WaveMenu, programControls, 90, 160, 230, 25,
+                   "Waveform for oscillator 3:\nStarts with normal waveforms, then goes into hidden waveforms if supported.",
                    [this] { return midiProcessor.changeOscWaveform(OSC3, osc3WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1); });
 
     createComboBox(
         osc1OctMenu, programControls, 350, 100, 125, 25, "Octave for oscillator 1:\nNormal range is -3 to +5, while +6 and +7 are extended values.",
-        [this] { return midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState()); }, OSC_OCTAVE_MENU_OPTIONS);
+        [this] { return midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState()); },
+        OSC_OCTAVE_MENU_OPTIONS);
     createComboBox(
         osc2OctMenu, programControls, 350, 130, 125, 25, "Octave for oscillator 2:\nNormal range is -3 to +5, while +6 and +7 are extended values.",
-        [this] { return midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState()); }, OSC_OCTAVE_MENU_OPTIONS);
+        [this] { return midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState()); },
+        OSC_OCTAVE_MENU_OPTIONS);
     createComboBox(
         osc3OctMenu, programControls, 350, 160, 125, 25, "Octave for oscillator 3:\nNormal range is -3 to +5, while +6 and +7 are extended values.",
-        [this] { return midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState()); }, OSC_OCTAVE_MENU_OPTIONS);
+        [this] { return midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState()); },
+        OSC_OCTAVE_MENU_OPTIONS);
 
 
     const StringArray OSC_SEMI_OPTIONS = {"+0", "+1", "+2", "+3", "+4", "+5", "+6", "+7", "+8", "+9", "+10", "+11"};
 
-    createComboBox(osc1SemiMenu, programControls, 480, 100, 70, 25, "Semitone for oscillator 1", [this] { return midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState()); }, OSC_SEMI_OPTIONS);
-    createComboBox(osc2SemiMenu, programControls, 480, 130, 70, 25, "Semitone for oscillator 2", [this] { return midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState()); }, OSC_SEMI_OPTIONS);
-    createComboBox(osc3SemiMenu, programControls, 480, 160, 70, 25, "Semitone for oscillator 3", [this] { return midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState()); }, OSC_SEMI_OPTIONS);
+    createComboBox(
+        osc1SemiMenu, programControls, 480, 100, 70, 25, "Semitone for oscillator 1",
+        [this] { return midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState()); },
+        OSC_SEMI_OPTIONS);
+    createComboBox(
+        osc2SemiMenu, programControls, 480, 130, 70, 25, "Semitone for oscillator 2",
+        [this] { return midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState()); },
+        OSC_SEMI_OPTIONS);
+    createComboBox(
+        osc3SemiMenu, programControls, 480, 160, 70, 25, "Semitone for oscillator 3",
+        [this] { return midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState()); },
+        OSC_SEMI_OPTIONS);
 
 
-    createToggleButton(osc1LFButton, programControls, 565, 100, 20, 20, "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 1 when enabled.", [this] { return midiProcessor.toggleLowFrequencyMode(OSC1, osc1LFButton); });
-    createToggleButton(osc2LFButton, programControls, 565, 130, 20, 20, "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 2 when enabled.", [this] { return midiProcessor.toggleLowFrequencyMode(OSC2, osc2LFButton); });
-    createToggleButton(osc3LFButton, programControls, 565, 160, 20, 20, "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 3 when enabled.", [this] { return midiProcessor.toggleLowFrequencyMode(OSC3, osc3LFButton); });
+    createToggleButton(osc1LFButton, programControls, 565, 100, 20, 20,
+                       "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 1 when enabled.",
+                       [this] { return midiProcessor.toggleLowFrequencyMode(OSC1, osc1LFButton); });
+    createToggleButton(osc2LFButton, programControls, 565, 130, 20, 20,
+                       "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 2 when enabled.",
+                       [this] { return midiProcessor.toggleLowFrequencyMode(OSC2, osc2LFButton); });
+    createToggleButton(osc3LFButton, programControls, 565, 160, 20, 20,
+                       "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 3 when enabled.",
+                       [this] { return midiProcessor.toggleLowFrequencyMode(OSC3, osc3LFButton); });
 
     // ------------------ Filter self-oscillation ------------------
 
-    createToggleButton(selfOscButton, programControls, 680, 130, 20, 20, "Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.", [this] { return midiProcessor.toggleSelfOscillation(selfOscButton); });
+    createToggleButton(selfOscButton, programControls, 680, 130, 20, 20,
+                       "Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.",
+                       [this] { return midiProcessor.toggleSelfOscillation(selfOscButton); });
 
     programControls.setBounds(0, 0, displayWidth, displayHeight);
     programControls.setColour(GroupComponent::outlineColourId, Colours::transparentBlack);
@@ -220,8 +243,9 @@ void MainComponent::releaseResources() {}
 //==============================================================================
 
 void MainComponent::paint(Graphics& g) {
-    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0, backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1], (float)(windowWidth / 2),
-                                     (float)windowHeight, true));
+    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0,
+                                     backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1],
+                                     (float)(windowWidth / 2), (float)windowHeight, true));
     g.fillAll();
 
     // Top red line
@@ -275,7 +299,9 @@ void MainComponent::showContextMenu() {
     menu.addItem(3, "Quit");
     menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
         if (result == 2) {
-            AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick", "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion 0.43\n\nCopyright Vincent Zauhar, 2024\nReleased under the GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
+            AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
+                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion 0.43\n\nCopyright Vincent Zauhar, 2024\nReleased under the "
+                                             "GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
     });
@@ -450,7 +476,8 @@ SynthModel MainComponent::getCurrentSynthModel() const {
         return UNKNOWN;
 }
 
-void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour, const Font& font) {
+void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour,
+                                const Font& font) {
     label.setBounds(x, y, width, height);
     label.setText(text, NO);
     label.setFont(font);
@@ -459,7 +486,8 @@ void MainComponent::createLabel(Label& label, Component& parent, const String& t
     parent.addAndMakeVisible(label);
 }
 
-void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items) {
+void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                   const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items) {
     comboBox.addItemList(items, 1);
     comboBox.setSelectedItemIndex(0, NO);
     comboBox.setBounds(x, y, width, height);
@@ -468,7 +496,8 @@ void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const 
     comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
 }
 
-void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip, const std::function<DeviceResponse()>& onClickFunc) {
+void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                       const std::function<DeviceResponse()>& onClickFunc) {
     button.setBounds(x, y, width, height);
     button.setTooltip(tooltip);
     parent.addAndMakeVisible(button);
