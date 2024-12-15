@@ -182,19 +182,19 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
         OSC_SEMI_OPTIONS);
 
 
-    createToggleButton(osc1LFButton, programControls, 565, 100, 20, 20,
+    createToggleButton(osc1LFButton, programControls, 570, 102, 20, 20,
                        "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 1 when enabled.",
                        [this] { return midiProcessor.toggleLowFrequencyMode(OSC1, osc1LFButton); });
-    createToggleButton(osc2LFButton, programControls, 565, 130, 20, 20,
+    createToggleButton(osc2LFButton, programControls, 570, 132, 20, 20,
                        "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 2 when enabled.",
                        [this] { return midiProcessor.toggleLowFrequencyMode(OSC2, osc2LFButton); });
-    createToggleButton(osc3LFButton, programControls, 565, 160, 20, 20,
+    createToggleButton(osc3LFButton, programControls, 570, 162, 20, 20,
                        "Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 3 when enabled.",
                        [this] { return midiProcessor.toggleLowFrequencyMode(OSC3, osc3LFButton); });
 
     // ------------------ Filter self-oscillation ------------------
 
-    createToggleButton(selfOscButton, programControls, 680, 130, 20, 20,
+    createToggleButton(selfOscButton, programControls, 680, 132, 20, 20,
                        "Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.",
                        [this] { return midiProcessor.toggleSelfOscillation(selfOscButton); });
 
