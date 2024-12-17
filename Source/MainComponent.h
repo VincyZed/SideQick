@@ -160,19 +160,10 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     GroupComponent statusSection;
 
     StringArray waveMenuOpts;
-    ComboBox osc1WaveMenu;
-    ComboBox osc2WaveMenu;
-    ComboBox osc3WaveMenu;
-    ComboBox osc1OctMenu;
-    ComboBox osc1SemiMenu;
-    ComboBox osc2OctMenu;
-    ComboBox osc2SemiMenu;
-    ComboBox osc3OctMenu;
-    ComboBox osc3SemiMenu;
-    ToggleButton osc1LFButton;
-    ToggleButton osc2LFButton;
-    ToggleButton osc3LFButton;
-
+    ComboBox waveMenus[3];
+    ComboBox octMenus[3];
+    ComboBox semiMenus[3];
+    ToggleButton LFButtons[3];
     ToggleButton selfOscButton;
 
 

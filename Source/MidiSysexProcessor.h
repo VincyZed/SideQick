@@ -32,7 +32,7 @@ class MidiSysexProcessor {
     DeviceResponse toggleSelfOscillation(ToggleButton& selfOscButton);
     DeviceResponse changeOscWaveform(int oscNumber, int waveformIndex);
     DeviceResponse changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange);
-    DeviceResponse toggleLowFrequencyMode(int oscNumber, ToggleButton& lowFreqToggleButton);
+    DeviceResponse toggleLowFrequencyMode(int oscNumber, bool lowFreqEnabled);
 
   private:
     Array<MidiMessage> receivedSysExMessages;
