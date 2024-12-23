@@ -256,24 +256,15 @@ void MainComponent::showContextMenu() {
     // Create a menu
     PopupMenu menu;
     PopupMenu themeSubMenu;
-    // Add theme options with checkmarks and actions
-    themeSubMenu.addItem(PopupMenu::Item("Automatic").setTicked(selectedThemeOption == AUTOMATIC_THEME).setAction([this]() {
-        selectedThemeOption = AUTOMATIC_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addSeparator();
-    themeSubMenu.addItem(PopupMenu::Item("SQ-80").setTicked(selectedThemeOption == SQ80_THEME).setAction([this]() {
-        selectedThemeOption = SQ80_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addItem(PopupMenu::Item("ESQ-1").setTicked(selectedThemeOption == ESQ1_THEME).setAction([this]() {
-        selectedThemeOption = ESQ1_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addItem(PopupMenu::Item("Neutral").setTicked(selectedThemeOption == NEUTRAL_THEME).setAction([this]() {
-        selectedThemeOption = NEUTRAL_THEME;
-        updateTheme();
-    }));
+
+    for (int themeOption = 0; themeOption < THEME_OPTIONS.size(); themeOption++) {
+        if (themeOption == AUTOMATIC_THEME + 1)
+            themeSubMenu.addSeparator();
+        themeSubMenu.addItem(PopupMenu::Item(THEME_OPTIONS[themeOption]).setTicked(selectedThemeOption == themeOption).setAction([themeOption, this]() {
+            selectedThemeOption = themeOption;
+            updateTheme();
+        }));
+    }
 
     menu.addSubMenu("Theme", themeSubMenu);
     menu.addItem(2, "About SideQick...");
@@ -423,7 +414,6 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
 
 void MainComponent::updateTheme() {
     refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel : selectedThemeOption - 1]);
-    refreshButton.repaint();
     repaint();
 }
 

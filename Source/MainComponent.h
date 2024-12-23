@@ -84,7 +84,8 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     TooltipWindow tooltipWindow;
     std::unique_ptr<PlasticTexture> textureOverlay;
 
-    enum ThemeOptions { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
+    enum Themes { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
+    const StringArray THEME_OPTIONS = {"Automatic", "SQ-80", "ESQ-1", "Neutral"};
     unsigned int selectedThemeOption = AUTOMATIC_THEME;
 
     MidiSysexProcessor midiProcessor;
