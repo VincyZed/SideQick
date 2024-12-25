@@ -14,6 +14,7 @@ jobs:
   process-binaries:
     name: Process Binaries and Upload
     runs-on: ubuntu-latest
+    needs: build  # Ensures this job runs after the 'build' job completes.
 
     steps:
     - name: Download Windows artifact
@@ -34,14 +35,24 @@ jobs:
         name: SideQick-linux.zip
         path: build/SideQick_artefacts/Release
 
-    - name: Create GitHub Release
+    - name: Generate version number
+      id: version
+      shell: bash
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        BUILD_ID=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 5)
+        VERSION="${DATE}-${BUILD_ID}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Create Pre-Release
       id: create_release
       uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
-        tag_name: "build-${{ github.run_number }}"
-        release_name: "Build #${{ github.run_number }}"
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        release_name: "Pre-Release ${{ steps.version.outputs.VERSION }}"
         draft: false
         prerelease: true
 
