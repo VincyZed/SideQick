@@ -17,6 +17,7 @@
 #include "MidiSysexProcessor.h"
 #include "PannelButton.h"
 #include "ProgramParser.h"
+#include <functional>
 
 using namespace juce;
 
@@ -55,57 +56,23 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     addAndMakeVisible(logo);
 
     // ========================= Sections labels =========================
-    descriptionLabel.setBounds(25, 145, 395, 20);
-    descriptionLabel.setText("SQ-80 / ESQ-1 expansion software", NO);
-    descriptionLabel.setFont(descriptionTextFont);
-    descriptionLabel.setColour(Label::textColourId, descriptionTextColour);
-    addAndMakeVisible(descriptionLabel);
 
-    midiSectionLabel.setBounds(400, 150, 50, 30);
-    midiSectionLabel.setText("Midi", NO);
-    midiSectionLabel.setFont(sectionsTextFont);
-    midiSectionLabel.setColour(Label::textColourId, sectionsTextColour);
-    addAndMakeVisible(midiSectionLabel);
-
-    midiInLabel.setBounds(400, 20, 200, 30);
-    midiInLabel.setText("Input device :", NO);
-    midiInLabel.setFont(menusTextFont);
-    midiInLabel.setColour(Label::textColourId, menusTextColour);
-    addAndMakeVisible(midiInLabel);
-
-    midiOutLabel.setBounds(400, 55, 200, 30);
-    midiOutLabel.setText("Output device :", NO);
-    midiOutLabel.setFont(menusTextFont);
-    midiOutLabel.setColour(Label::textColourId, menusTextColour);
-    addAndMakeVisible(midiOutLabel);
+    createLabel(descriptionLabel, *this, "SQ-80 / ESQ-1 expansion software", 25, 145, 395, 20, descriptionTextColour, descriptionTextFont);
+    createLabel(midiSectionLabel, *this, "Midi", 400, 150, 50, 30, sectionsTextColour, sectionsTextFont);
+    createLabel(midiInLabel, *this, "Input device :", 400, 20, 200, 30, menusTextColour, menusTextFont);
+    createLabel(midiOutLabel, *this, "Output device :", 400, 55, 200, 30, menusTextColour, menusTextFont);
 
     // ==================== Program Name =====================
-    programTitleLabel.setBounds(10, 5, 395, 30);
-    programTitleLabel.setText("Current   Program   =", NO);
+    // createLabel(programTitleLabel, programControls, "Current   Program   =", 10, 5, 395, 30);
+    // createLabel(programNameLabel, programControls, "______", 210, 5, 300, 30);
+    // ==================== Status Section =====================
 
-    programNameLabel.setBounds(210, 5, 300, 30);
-    programNameLabel.setText("______", NO);
+    createLabel(statusTitleLabel, statusSection, "5tatu5    =", 398, 5, 250, 30);
+    createLabel(statusLabel, statusSection, "Di5connected", 560, 5, 300, 30);
+    createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
+    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
+    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
 
-    // ==================== MIDI Section =====================
-
-    statusTitleLabel.setBounds(398, 5, 250, 30);
-    statusTitleLabel.setText("5tatu5    =", NO);
-    statusSection.addAndMakeVisible(statusTitleLabel);
-
-    statusLabel.setBounds(560, 5, 300, 30);
-    statusLabel.setText("Di5connected", NO);
-    statusSection.addAndMakeVisible(statusLabel);
-
-    modelLabel.setBounds(580, 5, 300, 30);
-    modelLabel.setText("", NO);
-    statusSection.addChildComponent(modelLabel);
-
-    disconnectedUnderline.setBounds(560, 10, 300, 30);
-    disconnectedUnderline.setText("____________", NO);
-    statusSection.addChildComponent(disconnectedUnderline);
-    sysexDisabledUnderline.setBounds(500, 10, 300, 30);
-    sysexDisabledUnderline.setText("_______________________", NO);
-    statusSection.addChildComponent(sysexDisabledUnderline);
 
     refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
     refreshButton.onClick = [this] {
@@ -159,231 +126,58 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     midiControls.setBounds(0, 0, windowWidth, windowHeight);
 
-    // ========================== Illegal parameter values controls ==========================
+    // ========================== Display elements ==========================
+
+    // --------------------------- Labels ---------------------------
+    createLabel(osc1Label, programSection, "O5C 1", 10, 100, 125, 25);
+    createLabel(osc2Label, programSection, "O5C 2", 10, 130, 125, 25);
+    createLabel(osc3Label, programSection, "O5C 3", 10, 160, 125, 25);
+    createLabel(waveLabel, programSection, "WAVEFORM", 90, 70, 125, 25);
+    createLabel(octLabel, programSection, "OCT", 350, 70, 125, 25);
+    createLabel(semiLabel, programSection, "5EMI", 480, 70, 125, 25);
+    createLabel(LFLabel, programSection, "LF", 565, 70, 125, 25);
+    createLabel(selfOscLabel, programSection, "Filt    5elf-O5c", 610, 102, 250, 20);
 
     // ------------------ OSC Octaves and semitones ------------------
 
-    // Label for the OSC1
-    osc1Label.setBounds(10, 100, 125, 25);
-    osc1Label.setText("O5C 1", NO);
-    programSection.addAndMakeVisible(osc1Label);
+    const int oscControlsYPos[3] = {100, 130, 160};
+    const StringArray OSC_OCTAVE_MENU_OPTIONS = {"-3   to   +5", "+6", "+7"};
+    const StringArray OSC_SEMI_OPTIONS = {"+0", "+1", "+2", "+3", "+4", "+5", "+6", "+7", "+8", "+9", "+10", "+11"};
 
-    // Label for the OSC2
-    osc2Label.setBounds(10, 130, 125, 25);
-    osc2Label.setText("O5C 2", NO);
-    programSection.addAndMakeVisible(osc2Label);
+    for (int osc = 0; osc < 3; osc++) {
+        String waveMenuTooltip = "Waveform for oscillator " + String(osc + 1) + ":\nThe first option is normal waveforms, the rest are hidden waveforms, if supported.";
+        String octMenuTooltip = "Octave for oscillator " + String(osc + 1) + ":\nNormal range is -3 to +5, while +6 and +7 are extended values.";
+        String semiMenuTooltip = "Semitone for oscillator " + String(osc + 1);
+        String LFButtonTooltip = "Low-Frequency mode:\nShifts the frequency range down by a couple of octaves internally for oscillator " + String(osc + 1) +
+                                 " when enabled. Displayed values are unchanged.";
 
-    // Label for the OSC3
-    osc3Label.setBounds(10, 160, 125, 25);
-    osc3Label.setText("O5C 3", NO);
-    programSection.addAndMakeVisible(osc3Label);
+        createComboBox(waveMenus[osc], programControls, 90, oscControlsYPos[osc], 230, 25, waveMenuTooltip,
+                       [this, osc] { return midiProcessor.changeOscWaveform(osc, waveMenus[osc].getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1); });
 
-    // Label for the wave column
-    waveLabel.setBounds(90, 70, 125, 25);
-    waveLabel.setText("WAVEFORM", NO);
-    programSection.addAndMakeVisible(waveLabel);
+        createComboBox(
+            octMenus[osc], programControls, 350, oscControlsYPos[osc], 125, 25, octMenuTooltip,
+            [this, osc] {
+                return midiProcessor.changeOscPitch(osc, octMenus[osc].getSelectedItemIndex() + 5, semiMenus[osc].getSelectedItemIndex(),
+                                                    LFButtons[osc].getToggleState());
+            },
+            OSC_OCTAVE_MENU_OPTIONS);
 
-    // Label for the octave column
-    octLabel.setBounds(350, 70, 125, 25);
-    octLabel.setText("OCT", NO);
-    programSection.addAndMakeVisible(octLabel);
+        createComboBox(
+            semiMenus[osc], programControls, 480, oscControlsYPos[osc], 70, 25, semiMenuTooltip,
+            [this, osc] {
+                return midiProcessor.changeOscPitch(osc, octMenus[osc].getSelectedItemIndex() + 5, semiMenus[osc].getSelectedItemIndex(),
+                                                    LFButtons[osc].getToggleState());
+            },
+            OSC_SEMI_OPTIONS);
 
-    // Label for the semitone column
-    semiLabel.setBounds(480, 70, 125, 25);
-    semiLabel.setText("5EMI", NO);
-    programSection.addAndMakeVisible(semiLabel);
+        createToggleButton(LFButtons[osc], programControls, 570, oscControlsYPos[osc] + 2, 20, 20, LFButtonTooltip,
+                           [this, osc] { return midiProcessor.toggleLowFrequencyMode(osc, LFButtons[osc].getToggleState()); });
+    }
 
-    LFLabel.setBounds(565, 70, 125, 25);
-    LFLabel.setText("LF", NO);
-    programSection.addAndMakeVisible(LFLabel);
-
-    // Menu to select the OSC1 wave
-    osc1WaveMenu.setBounds(90, 100, 230, 25);
-    osc1WaveMenu.setTooltip("Waveform for oscillator 1:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
-    programControls.addAndMakeVisible(osc1WaveMenu);
-    osc1WaveMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscWaveform(OSC1, osc1WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC2 wave
-    osc2WaveMenu.addItemList(waveMenuOpts, 1);
-    osc2WaveMenu.setBounds(90, 130, 230, 25);
-    osc2WaveMenu.setSelectedItemIndex(0, NO);
-    osc2WaveMenu.setTooltip("Waveform for oscillator 2:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
-    programControls.addAndMakeVisible(osc2WaveMenu);
-    osc2WaveMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscWaveform(OSC2, osc2WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC3 wave
-    osc3WaveMenu.addItemList(waveMenuOpts, 1);
-    osc3WaveMenu.setBounds(90, 160, 230, 25);
-    osc3WaveMenu.setSelectedItemIndex(0, NO);
-    osc3WaveMenu.setTooltip("Waveform for oscillator 3:\nStarts with normal waveforms, then goes into hidden waveforms if supported.");
-    programControls.addAndMakeVisible(osc3WaveMenu);
-    osc3WaveMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscWaveform(OSC3, osc3WaveMenu.getSelectedItemIndex() + NB_OF_WAVES[getCurrentSynthModel()] - 1);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC1 octave
-    StringArray oscOctaveMenuOptions = {"-3   to   +5", "+6", "+7"};
-    osc1OctMenu.addItemList(oscOctaveMenuOptions, 1);
-    osc1OctMenu.setBounds(350, 100, 125, 25);
-    osc1OctMenu.setSelectedItemIndex(0, NO);
-    osc1OctMenu.setTooltip("Octave for oscillator 1:\nNormal range is -3 to +5, while +6 and +7 are extended values.");
-    programControls.addAndMakeVisible(osc1OctMenu);
-    osc1OctMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC2 octave
-    osc2OctMenu.addItemList(oscOctaveMenuOptions, 1);
-    osc2OctMenu.setBounds(350, 130, 125, 25);
-    osc2OctMenu.setSelectedItemIndex(0, NO);
-    osc2OctMenu.setTooltip("Octave for oscillator 2:\nNormal range is -3 to +5, while +6 and +7 are extended values.");
-    programControls.addAndMakeVisible(osc2OctMenu);
-    osc2OctMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC3 octave
-    osc3OctMenu.addItemList(oscOctaveMenuOptions, 1);
-    osc3OctMenu.setBounds(350, 160, 125, 25);
-    osc3OctMenu.setSelectedItemIndex(0, NO);
-    osc3OctMenu.setTooltip("Octave for oscillator 3:\nNormal range is -3 to +5, while +6 and +7 are extended values.");
-    programControls.addAndMakeVisible(osc3OctMenu);
-    osc3OctMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Menu to select the OSC1 semitone
-    StringArray oscSemitoneOptions = {"+0", "+1", "+2", "+3", "+4", "+5", "+6", "+7", "+8", "+9", "+10", "+11"};
-    osc1SemiMenu.addItemList(oscSemitoneOptions, 1);
-    osc1SemiMenu.setBounds(480, 100, 70, 25);
-    osc1SemiMenu.setSelectedItemIndex(0, NO);
-    osc1SemiMenu.setEnabled(true);
-    osc1SemiMenu.setTooltip("Semitone for oscillator 1");
-    programControls.addAndMakeVisible(osc1SemiMenu);
-    osc1SemiMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC1, osc1OctMenu.getSelectedItemIndex() + 5, osc1SemiMenu.getSelectedItemIndex(), osc1LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Add a menu to select the OSC2 semitone
-    osc2SemiMenu.addItemList(oscSemitoneOptions, 1);
-    osc2SemiMenu.setBounds(480, 130, 70, 25);
-    osc2SemiMenu.setSelectedItemIndex(0, NO);
-    osc2SemiMenu.setEnabled(true);
-    osc2SemiMenu.setTooltip("Semitone for oscillator 2");
-    programControls.addAndMakeVisible(osc2SemiMenu);
-    osc2SemiMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC2, osc2OctMenu.getSelectedItemIndex() + 5, osc2SemiMenu.getSelectedItemIndex(), osc2LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Add a menu to select the OSC3 semitone
-    osc3SemiMenu.addItemList(oscSemitoneOptions, 1);
-    osc3SemiMenu.setBounds(480, 160, 70, 25);
-    osc3SemiMenu.setSelectedItemIndex(0, NO);
-    osc3SemiMenu.setEnabled(true);
-    osc3SemiMenu.setTooltip("Semitone for oscillator 3");
-    programControls.addAndMakeVisible(osc3SemiMenu);
-    osc3SemiMenu.onChange = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.changeOscPitch(OSC3, osc3OctMenu.getSelectedItemIndex() + 5, osc3SemiMenu.getSelectedItemIndex(), osc3LFButton.getToggleState());
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
-
-    // Button to toggle OSC1 low-frequency range
-    osc1LFButton.setBounds(570, 102, 20, 20);
-    osc1LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 1 when enabled.");
-    programControls.addAndMakeVisible(osc1LFButton);
-    osc1LFButton.onClick = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.toggleLowFrequencyMode(OSC1, osc1LFButton);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-        osc1OctMenu.setSelectedItemIndex(0, NO);
-    };
-
-    // Button to toggle OSC2 low-frequency range
-    osc2LFButton.setBounds(570, 132, 20, 20);
-    osc2LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 2 when enabled.");
-    programControls.addAndMakeVisible(osc2LFButton);
-    osc2LFButton.onClick = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.toggleLowFrequencyMode(OSC2, osc2LFButton);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-        osc2OctMenu.setSelectedItemIndex(0, NO);
-    };
-
-    // Button to toggle OSC3 low-frequency range
-    osc3LFButton.setBounds(570, 162, 20, 20);
-    osc3LFButton.setTooltip("Low-Frequency mode:\nShifts the whole frequency range down by a couple of octaves for oscillator 3 when enabled.");
-    programControls.addAndMakeVisible(osc3LFButton);
-    osc3LFButton.onClick = [this] {
-        ;
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.toggleLowFrequencyMode(OSC3, osc3LFButton);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-        osc3OctMenu.setSelectedItemIndex(0, NO);
-    };
 
     // ------------------ Filter self-oscillation ------------------
-
-    // Button to toggle self-oscillation
-    selfOscLabel.setBounds(610, 102, 250, 20);
-    selfOscLabel.setText("Filt    5elf-Osc", NO);
-    programSection.addAndMakeVisible(selfOscLabel);
-
-    selfOscButton.setBounds(680, 130, 20, 20);
-    selfOscButton.setTooltip("Filter self-oscillation:\nShifts the whole resonance range internally up to 32-63 when enabled.");
-    programControls.addAndMakeVisible(selfOscButton);
-
-    selfOscButton.onClick = [this] {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
-        Thread::launch([this] {
-            auto status = midiProcessor.toggleSelfOscillation(selfOscButton);
-            MessageManager::callAsync([this, status] { updateStatus(status); });
-        });
-    };
+    String selfOscButtonTooltip = "Filter self-oscillation:\nShifts the whole resonance range up internally to what would be values of 32-63 when enabled.";
+    createToggleButton(selfOscButton, programControls, 680, 132, 20, 20, selfOscButtonTooltip, [this] { return midiProcessor.toggleSelfOscillation(selfOscButton); });
 
     programControls.setBounds(0, 0, displayWidth, displayHeight);
     programControls.setColour(GroupComponent::outlineColourId, Colours::transparentBlack);
@@ -430,8 +224,9 @@ void MainComponent::releaseResources() {}
 //==============================================================================
 
 void MainComponent::paint(Graphics& g) {
-    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0, backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1], (float)(windowWidth / 2),
-                                     (float)windowHeight, true));
+    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0,
+                                     backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1],
+                                     (float)(windowWidth / 2), (float)windowHeight, true));
     g.fillAll();
 
     // Top red line
@@ -461,31 +256,24 @@ void MainComponent::showContextMenu() {
     // Create a menu
     PopupMenu menu;
     PopupMenu themeSubMenu;
-    // Add theme options with checkmarks and actions
-    themeSubMenu.addItem(PopupMenu::Item("Automatic").setTicked(selectedThemeOption == AUTOMATIC_THEME).setAction([this]() {
-        selectedThemeOption = AUTOMATIC_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addSeparator();
-    themeSubMenu.addItem(PopupMenu::Item("SQ-80").setTicked(selectedThemeOption == SQ80_THEME).setAction([this]() {
-        selectedThemeOption = SQ80_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addItem(PopupMenu::Item("ESQ-1").setTicked(selectedThemeOption == ESQ1_THEME).setAction([this]() {
-        selectedThemeOption = ESQ1_THEME;
-        updateTheme();
-    }));
-    themeSubMenu.addItem(PopupMenu::Item("Neutral").setTicked(selectedThemeOption == NEUTRAL_THEME).setAction([this]() {
-        selectedThemeOption = NEUTRAL_THEME;
-        updateTheme();
-    }));
+
+    for (int themeOption = 0; themeOption < THEME_OPTIONS.size(); themeOption++) {
+        if (themeOption == AUTOMATIC_THEME + 1)
+            themeSubMenu.addSeparator();
+        themeSubMenu.addItem(PopupMenu::Item(THEME_OPTIONS[themeOption]).setTicked(selectedThemeOption == themeOption).setAction([themeOption, this]() {
+            selectedThemeOption = themeOption;
+            updateTheme();
+        }));
+    }
 
     menu.addSubMenu("Theme", themeSubMenu);
     menu.addItem(2, "About SideQick...");
     menu.addItem(3, "Quit");
     menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
         if (result == 2) {
-            AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick", "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion 0.43\n\nCopyright Vincent Zauhar, 2024\nReleased under the GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
+            AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
+                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion 0.43\n\nCopyright Vincent Zauhar, 2024\nReleased under the "
+                                             "GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
     });
@@ -507,42 +295,31 @@ void MainComponent::updateStatus(DeviceResponse response) {
         currentModel = getCurrentSynthModel();
 
         if (response.model != UNCHANGED) {
-            // Remove all the waveforms from the menu
-            osc1WaveMenu.clear(NO);
-            osc2WaveMenu.clear(NO);
-            osc3WaveMenu.clear(NO);
+            // Update the waveforms in the menus
+            for (int osc = 0; osc < 3; osc++)
+                waveMenus[osc].clear(NO);
 
-            // Add the new waveforms to the menu
             waveMenuOpts = {"WAV0    to    WAV" + String(NB_OF_WAVES[currentModel] - 1)};
             if (currentModel == SQ80 || currentModel == ESQ1 && response.osVersion >= ESQ1_HIDDEN_WAVES_MIN_VERSION) {
-                for (int i = NB_OF_WAVES[currentModel]; i < 256; i++) {
-                    waveMenuOpts.add("WAV" + String(i));
-                }
-                osc1WaveMenu.addItemList(waveMenuOpts, 1);
-                osc2WaveMenu.addItemList(waveMenuOpts, 1);
-                osc3WaveMenu.addItemList(waveMenuOpts, 1);
+                for (int w = NB_OF_WAVES[currentModel]; w < 256; w++)
+                    waveMenuOpts.add("WAV" + String(w));
+
+                for (int osc = 0; osc < 3; osc++)
+                    waveMenus[osc].addItemList(waveMenuOpts, 1);
             }
 
-            // Update the theme
-            if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN) {
+            if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)
                 updateTheme();
-            }
         }
 
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
 
-        osc1WaveMenu.setSelectedItemIndex(parameterValues.currentWave[OSC1], NO);
-        osc2WaveMenu.setSelectedItemIndex(parameterValues.currentWave[OSC2], NO);
-        osc3WaveMenu.setSelectedItemIndex(parameterValues.currentWave[OSC3], NO);
-        osc1OctMenu.setSelectedItemIndex(parameterValues.currentOct[OSC1], NO);
-        osc2OctMenu.setSelectedItemIndex(parameterValues.currentOct[OSC2], NO);
-        osc3OctMenu.setSelectedItemIndex(parameterValues.currentOct[OSC3], NO);
-        osc1SemiMenu.setSelectedItemIndex(parameterValues.currentRealSemi[OSC1], NO);
-        osc2SemiMenu.setSelectedItemIndex(parameterValues.currentRealSemi[OSC2], NO);
-        osc3SemiMenu.setSelectedItemIndex(parameterValues.currentRealSemi[OSC3], NO);
-        osc1LFButton.setToggleState(parameterValues.currentOscLF[OSC1], NO);
-        osc2LFButton.setToggleState(parameterValues.currentOscLF[OSC2], NO);
-        osc3LFButton.setToggleState(parameterValues.currentOscLF[OSC3], NO);
+        for (int osc = 0; osc < 3; osc++) {
+            waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO);
+            octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO);
+            semiMenus[osc].setSelectedItemIndex(parameterValues.currentRealSemi[osc], NO);
+            LFButtons[osc].setToggleState(parameterValues.currentOscLF[osc], NO);
+        }
         selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO);
 
         statusLabel.setBounds(500, 5, 300, 30);
@@ -637,7 +414,6 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
 
 void MainComponent::updateTheme() {
     refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel : selectedThemeOption - 1]);
-    refreshButton.repaint();
     repaint();
 }
 
@@ -658,4 +434,41 @@ SynthModel MainComponent::getCurrentSynthModel() const {
         return ESQ1;
     else
         return UNKNOWN;
+}
+
+void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour,
+                                const Font& font) {
+    label.setBounds(x, y, width, height);
+    label.setText(text, NO);
+    label.setFont(font);
+    if (colour != Colour())
+        label.setColour(Label::textColourId, colour);
+    parent.addAndMakeVisible(label);
+}
+
+void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                   const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items) {
+    comboBox.addItemList(items, 1);
+    comboBox.setSelectedItemIndex(0, NO);
+    comboBox.setBounds(x, y, width, height);
+    comboBox.setTooltip(tooltip);
+    comboBox.setText("");
+    parent.addAndMakeVisible(comboBox);
+    comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
+}
+
+void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                       const std::function<DeviceResponse()>& onClickFunc) {
+    button.setBounds(x, y, width, height);
+    button.setTooltip(tooltip);
+    parent.addAndMakeVisible(button);
+    button.onClick = [this, onClickFunc] { displayControlOnChange(onClickFunc); };
+}
+
+void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc) {
+    updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
+    Thread::launch([this, &onChangeFunc] {
+        DeviceResponse status = onChangeFunc();
+        MessageManager::callAsync([this, status] { updateStatus(status); });
+    });
 }

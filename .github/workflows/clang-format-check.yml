@@ -1,0 +1,29 @@
+name: Clang-Format Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.cpp'
+      - '**/*.hpp'
+      - '**/*.c'
+      - '**/*.h'
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Clang-Format
+        run: sudo apt-get install -y clang-format
+
+      - name: Run Clang-Format Check
+        run: |
+          # Find all relevant files
+          FILES=$(find . -regex '.*\.\(cpp\|hpp\|c\|h\)$')
+          # Run clang-format and fail if formatting is incorrect
+          for FILE in $FILES; do
+            clang-format --dry-run --Werror "$FILE"
+          done

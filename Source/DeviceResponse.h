@@ -27,18 +27,10 @@ const unsigned int ESQ1_HIDDEN_WAVES_MIN_VERSION = 350;
 
 class DeviceResponse {
   public:
-    // Indexes in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
-    const int ENSONIQ_FAMILY = 5;
-    const int ENSONIQ_MODEL = 7;
-    const int OS_VERSION[2] = {11, 12};
-
-    enum VersionNumber { MINOR, MAJOR };
-
     String status = STATUS_MESSAGES[DISCONNECTED];
     unsigned int model = UNKNOWN;
     unsigned int osVersion = 0;
 
-    // const uint8_t* currentProgramData;
     MidiMessage currentProgram;
 
     // This constructor should be called when we set the status to Disconnected
@@ -69,4 +61,12 @@ class DeviceResponse {
         // This returns an integer corresponding to the OS version, e.g. 353 for version 3.53
         this->osVersion = deviceIdData[OS_VERSION[MAJOR]] * 100 + deviceIdData[OS_VERSION[MINOR]];
     }
+
+  private:
+    // Indexes in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
+    const int ENSONIQ_FAMILY = 5;
+    const int ENSONIQ_MODEL = 7;
+    const int OS_VERSION[2] = {11, 12};
+
+    enum VersionNumber { MINOR, MAJOR };
 };

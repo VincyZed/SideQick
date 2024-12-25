@@ -176,7 +176,7 @@ DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
 }
 
-DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, ToggleButton& lowFreqToggleButton) {
+DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lowFreqEnabled) {
     // OCT+7 SEMI+8 is when the DOC wraps around and generates very low frequencies. It will show on the unit as OCT-3.
     // It sets the oscillator in a different frequency range, a bit like what toggleSelfOscillation() does for resonance.
     // Here we set it to OCT-2 by default because OCT-3 is still a very high frequency but from a different waveform, because... reasons.
@@ -190,7 +190,7 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, ToggleB
         HeapBlock<uint8_t> modifiedprogData(SQ_ESQ_PROG_SIZE);
         memcpy(modifiedprogData.getData(), progData, SQ_ESQ_PROG_SIZE);
 
-        if (lowFreqToggleButton.getToggleState()) {
+        if (lowFreqEnabled) {
             // Save the pitch values for the normal range if we were already in the normal range
             if (ProgramParser(currentProg, UNCHANGED).currentSemi[oscNumber] <= ProgramParser::MAX_SEMI_NORMAL_RANGE) {
                 pitchToggleNormal[oscNumber][0] = progData[ProgramParser::PITCH[oscNumber][0]];

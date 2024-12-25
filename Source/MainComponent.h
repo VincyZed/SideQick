@@ -39,35 +39,9 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
-    // No notification
-    NotificationType NO = NotificationType::dontSendNotification;
 
-    std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
 
-    Logo logo;
-
-    Font descriptionTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic));
-    Colour descriptionTextColour = Colour::fromRGB(170, 170, 170);
-
-    Font sectionsTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::bold));
-    Colour sectionsTextColour = Colour::fromRGB(255, 255, 225);
-
-    Font menusTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::plain));
-    Colour menusTextColour = Colour::fromRGB(255, 255, 240);
-
-    // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
-    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)}, {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)}, {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
-    const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
-    const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
-    const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};
-    const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
-
-    const float separatorThickness = 10.0f;
-
-    enum ThemeOptions { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
-    unsigned int selectedThemeOption = AUTOMATIC_THEME;
-
-    MidiSysexProcessor midiProcessor;
+  private:
     void handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message) override;
     void updateStatus(DeviceResponse response);
     void attemptConnection();
@@ -84,12 +58,63 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     void paint(Graphics& g) override;
     void resized() override;
 
-    SynthModel currentModel;
+    void showContextMenu();
+    void mouseDown(const juce::MouseEvent& event) override;
 
+    void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height,
+                                    const Colour& colour = Colour(), const Font& font = Font());
+
+    void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                       const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items = {});
+    void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc);
+
+    void MainComponent::createToggleButton(ToggleButton& button, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
+                                           const std::function<DeviceResponse()>& onClickFunc);
+
+    unsigned int windowWidth = 830;
+    unsigned int windowHeight = 410;
+
+    unsigned int displayWidth = 780;
+    unsigned int displayHeight = 200;
+
+    NotificationType NO = NotificationType::dontSendNotification;
+
+    std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
+    Logo logo;
+    TooltipWindow tooltipWindow;
+    std::unique_ptr<PlasticTexture> textureOverlay;
+
+    enum Themes { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
+    const StringArray THEME_OPTIONS = {"Automatic", "SQ-80", "ESQ-1", "Neutral"};
+    unsigned int selectedThemeOption = AUTOMATIC_THEME;
+
+    MidiSysexProcessor midiProcessor;
+    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
+
+
+    SynthModel currentModel;
     enum Oscillators { OSC1, OSC2, OSC3 };
 
-    // Array<MidiDeviceInfo> midiInDevices;
-    // Array<MidiDeviceInfo> midiOutDevices;
+
+    Font descriptionTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic));
+    Colour descriptionTextColour = Colour::fromRGB(170, 170, 170);
+
+    Font sectionsTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::bold));
+    Colour sectionsTextColour = Colour::fromRGB(255, 255, 225);
+
+    Font menusTextFont = Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::plain));
+    Colour menusTextColour = Colour::fromRGB(255, 255, 240);
+
+    // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
+    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
+                                            {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
+                                            {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
+    const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
+    const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
+    const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};
+    const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
+
+    const float separatorThickness = 10.0f;
 
     StringArray midiInDeviceNames;
     StringArray midiOutDeviceNames;
@@ -129,43 +154,19 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     GroupComponent midiControls;
 
-    // Contains the programControls and the labels
+    // The programSection contains both the programControls and the labels
     GroupComponent programSection;
     GroupComponent programControls;
     // The top row of the display
     GroupComponent statusSection;
 
     StringArray waveMenuOpts;
-    ComboBox osc1WaveMenu;
-    ComboBox osc2WaveMenu;
-    ComboBox osc3WaveMenu;
-    ComboBox osc1OctMenu;
-    ComboBox osc1SemiMenu;
-    ComboBox osc2OctMenu;
-    ComboBox osc2SemiMenu;
-    ComboBox osc3OctMenu;
-    ComboBox osc3SemiMenu;
-    ToggleButton osc1LFButton;
-    ToggleButton osc2LFButton;
-    ToggleButton osc3LFButton;
-
+    ComboBox waveMenus[3];
+    ComboBox octMenus[3];
+    ComboBox semiMenus[3];
+    ToggleButton LFButtons[3];
     ToggleButton selfOscButton;
 
-    void mouseDown(const juce::MouseEvent& event) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
-
-  private:
-    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
-    TooltipWindow tooltipWindow;
-
-    std::unique_ptr<PlasticTexture> textureOverlay;
-
-    void showContextMenu();
-
-    unsigned int windowWidth = 830;
-    unsigned int windowHeight = 410;
-
-    unsigned int displayWidth = 780;
-    unsigned int displayHeight = 200;
 };

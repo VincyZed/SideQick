@@ -1,11 +1,9 @@
 ---
 BasedOnStyle: LLVM
 
-AlignConsecutiveEnums: false
-AllowAllEnumsOnOneLine: true
 AllowShortFunctionsOnASingleLine: true
 BreakBeforeBraces: Attach
-BreakAfterEnumValue: false
-ColumnLimit: 300
+ColumnLimit: 170
 IndentWidth: 4
+MaxEmptyLinesToKeep: 10
 PointerAlignment: Left
