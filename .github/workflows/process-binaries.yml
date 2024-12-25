@@ -1,0 +1,85 @@
+name: Process Binaries Workflow
+
+on:
+  workflow_run:
+    workflows: ["Build Workflow"]
+    types:
+      - completed
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  process-binaries:
+    name: Process Binaries and Upload
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: SideQick-build-${{ matrix.name }}
+        path: binaries/
+
+    - name: Zip Windows Binary
+      if: contains(matrix.name, 'Windows')
+      run: |
+        mkdir -p binaries/zipped
+        zip -j binaries/zipped/SideQick-win64.zip binaries/SideQick.exe
+
+    - name: Zip macOS Binary
+      if: contains(matrix.name, 'macOS')
+      run: |
+        mkdir -p binaries/zipped
+        zip -r binaries/zipped/SideQick-macOS.zip binaries/SideQick.app
+
+    - name: Zip Linux Binary
+      if: contains(matrix.name, 'Linux')
+      run: |
+        mkdir -p binaries/zipped
+        zip -j binaries/zipped/SideQick-linux.zip binaries/SideQick
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        tag_name: "build-${{ github.run_number }}"
+        release_name: "Build #${{ github.run_number }}"
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset (Windows)
+      if: contains(matrix.name, 'Windows')
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: binaries/zipped/SideQick-win64.zip
+        asset_name: SideQick-win64.zip
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset (macOS)
+      if: contains(matrix.name, 'macOS')
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: binaries/zipped/SideQick-macOS.zip
+        asset_name: SideQick-macOS.zip
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset (Linux)
+      if: contains(matrix.name, 'Linux')
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: binaries/zipped/SideQick-linux.zip
+        asset_name: SideQick-linux.zip
+        asset_content_type: application/octet-stream

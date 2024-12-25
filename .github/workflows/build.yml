@@ -1,0 +1,72 @@
+name: Build Workflow
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Assets/**'
+      - 'Source/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Assets/**'
+      - 'Source/**'
+  workflow_dispatch: # Allows manual trigger
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: Build - ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: Linux
+            os: ubuntu-latest
+          - name: macOS
+            os: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+        build-essential \
+        cmake \
+        pkg-config \
+        libx11-dev \
+        libxrandr-dev \
+        libxinerama-dev \
+        libxcursor-dev \
+        libfreetype6-dev \
+        libfontconfig1-dev \
+        libasound2-dev
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build build --config ${{env.BUILD_TYPE}}
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SideQick-build-${{ matrix.name }}
+        path: build/
