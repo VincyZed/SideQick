@@ -72,7 +72,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
                                            const std::function<DeviceResponse()>& onClickFunc);
 
     unsigned int windowWidth = 830;
-    unsigned int windowHeight = 410;
+    unsigned int windowHeight = 450;
 
     unsigned int displayWidth = 780;
     unsigned int displayHeight = 200;
@@ -81,7 +81,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
     Logo logo;
-    TooltipWindow tooltipWindow;
+    std::unique_ptr<TooltipWindow> tooltipWindow;
     std::unique_ptr<PlasticTexture> textureOverlay;
 
     enum Themes { AUTOMATIC_THEME, SQ80_THEME, ESQ1_THEME, NEUTRAL_THEME };
@@ -89,7 +89,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     unsigned int selectedThemeOption = AUTOMATIC_THEME;
 
     MidiSysexProcessor midiProcessor;
-    const StringArray ignoredMidiDevices = {"Microsoft GS Wavetable Synth"};
+    const StringArray IGNORED_MIDI_DEVICES = {"Microsoft GS Wavetable Synth"};
 
 
     SynthModel currentModel;
@@ -106,15 +106,15 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     Colour menusTextColour = Colour::fromRGB(255, 255, 240);
 
     // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
-    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
-                                            {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
-                                            {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
-    const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
-    const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
-    const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};
-    const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
+    const Colour BACKGROUND_COLOURS[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
+                                             {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
+                                             {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
+    const Colour ACCENT_COLOURS[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
+    const Colour REFRESH_BUTTON_COLOURS[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(75, 75, 75)};
+    const Colour SEND_BUTTON_COLOURS[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(75, 75, 75)};
+    const Colour SAVE_BUTTON_COLOUR = Colour::fromRGB(175, 175, 175);
 
-    const float separatorThickness = 10.0f;
+    const float SEPARATOR_WIDTH = 10.0f;
 
     StringArray midiInDeviceNames;
     StringArray midiOutDeviceNames;
@@ -125,6 +125,10 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     Label midiInLabel;
     Label midiOutLabel;
+
+    Label bankProgramSectionLabel;
+    Label bankSectionLabel;
+    Label programSectionLabel;
 
     ComboBox midiInMenu;
     ComboBox midiOutMenu;
@@ -139,7 +143,11 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     Label disconnectedUnderline;
     Label sysexDisabledUnderline;
 
-    PannelButton refreshButton;
+    std::unique_ptr<PannelButton> refreshButton;
+    std::unique_ptr<PannelButton> sendButton;
+    std::unique_ptr<PannelButton> progSaveButton;
+    std::unique_ptr<PannelButton> bankSaveButton;
+    std::unique_ptr<PannelButton> seqSaveButton;
 
     Label osc1Label;
     Label osc2Label;

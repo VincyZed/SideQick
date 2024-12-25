@@ -30,7 +30,7 @@ PannelButton::PannelButton(const Colour& color, const String& text, const int& x
     label.attachToComponent(this, true);
     label.setColour(Label::textColourId, buttonTextColour);
     label.setFont(Font(FontOptions(Font::getDefaultSansSerifFontName(), 16.0f, Font::italic)));
-    label.setBounds(xPos - buttonWidth / 2, yPos - 20, 2 * buttonWidth, 0.5 * buttonHeight);
+    label.setBounds(xPos - buttonWidth, yPos - 25, 3 * buttonWidth, 0.75 * buttonHeight);
 }
 
 // Set the default constructor from the ShapeButton class
