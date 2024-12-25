@@ -3,7 +3,6 @@ BasedOnStyle: LLVM
 
 AllowShortFunctionsOnASingleLine: true
 BreakBeforeBraces: Attach
-BreakAfterEnumValue: false
 ColumnLimit: 170
 IndentWidth: 4
 MaxEmptyLinesToKeep: 10
