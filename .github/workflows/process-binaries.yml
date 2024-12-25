@@ -12,8 +12,17 @@ defaults:
 
 jobs:
   process-binaries:
-    name: Process Binaries and Upload
+    name: Process Binaries - ${{ matrix.os }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: Linux
+            os: ubuntu-latest
+          - name: macOS
+            os: macos-latest
 
     steps:
     - name: Download build artifacts
