@@ -1,7 +1,6 @@
 ---
 BasedOnStyle: LLVM
 
-AlignConsecutiveEnums: false
 AllowShortFunctionsOnASingleLine: true
 BreakBeforeBraces: Attach
 BreakAfterEnumValue: false
