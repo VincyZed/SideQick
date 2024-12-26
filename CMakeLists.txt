@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(SideQick VERSION 0.0.1)
 
-add_definitions(-D_WIN32_WINNT=0x0601) # Windows Vista or later
+add_definitions(-D_WIN32_WINNT=0x0600) # Windows Vista or later
 
 # JUCE setup
 add_subdirectory(JUCE)
