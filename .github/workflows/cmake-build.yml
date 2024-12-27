@@ -82,21 +82,21 @@ jobs:
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-win64.zip
+        name: SideQick-win64
         path: build/SideQick_artefacts/Release/SideQick-win64.zip
 
     - name: Upload binary (macOS)
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-macOS.zip
+        name: SideQick-macOS
         path: build/SideQick_artefacts/Release/SideQick-macOS.zip
     
     - name: Upload binary (Linux)
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-linux.zip
+        name: SideQick-linux
         path: build/SideQick_artefacts/Release/SideQick-linux.zip
 
   create-pre-release:
