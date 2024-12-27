@@ -55,6 +55,7 @@ Changes to the current program are thus applied and directly sent to the synth. 
 <br>
 
 # Building SideQick
+If you want to build SideQick from source yourself, here's the requirements and necessary steps. Otherwise if you just want to download and run the software, please refer to the [Downloads](#downloads) section.
 
 ## Installing dependencies
 Some dependencies are required to be able to build SideQick. First off, on any operating system, you will need to have [CMake](https://cmake.org/download/) installed.
