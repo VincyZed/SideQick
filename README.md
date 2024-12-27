@@ -24,7 +24,7 @@ As it stands, SideQick provides easy access to illegal value ranges for the foll
 - An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer **bidirectionaly**;
     - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
      - On the ESQ-1, currently OS version 3.0 or newer is needed to get recognized by SideQick. Version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
-    - More testing is needed for ESQ-m support. It may or may not work.
+    - The ESQ-m and [SQ-80m](http://www.buchty.net/ensoniq/files/sq80m.pdf) are currently not supported, but will likely be soon.
 
  
 # Troubleshooting
