@@ -39,15 +39,9 @@ class MidiSysexProcessor {
 
     const int SYSEX_DELAY = 800;
 
-    // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
-    const int FAMILY = 5;
-    const int MODEL = 7;
-    const int OS_VERSION[2] = {11, 12};
-
     enum VersionNumber { MINOR, MAJOR };
 
     // We subtract 2 to exclude the SysEx header and footer
-    const int DEVICE_ID_SIZE = 15 - 2;
     const int SQ_ESQ_PROG_SIZE = 210 - 2;
 
     const unsigned char REQUEST_ID[6] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
@@ -65,4 +59,6 @@ class MidiSysexProcessor {
     // For the low-frequency mode
     uint8_t pitchToggleNormal[3][2] = {{0x4, 0x2}, {0x4, 0x2}, {0x4, 0x2}};
     uint8_t pitchToggleLowFreq[3][2] = {{0xC, 0x8}, {0xC, 0x8}, {0xC, 0x8}};
+
+    DeviceResponse getConnectionStatus(MidiMessage deviceIdMessage);
 };

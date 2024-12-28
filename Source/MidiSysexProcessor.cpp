@@ -31,39 +31,28 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         Thread::sleep(SYSEX_DELAY);
 
         // There may be more than one device that responds to the DeviceInquiry request, since it's part of the MIDI standard.
-        // We need to get all the responses and check if any of them are from an SQ-80 or ESQ-1.
+        // We need to get all the responses and check if any of them are from an SQ-80/ESQ-1 family of synths.
         Array<MidiMessage> deviceIdMessages = receivedSysExMessages;
         receivedSysExMessages.clear();
 
-        auto verifySysexEnabled = [this](MidiMessage deviceIdMessage) {
-            auto currentProg = requestProgramDump();
-            if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE)
-                return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
-            else {
-                return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
-            }
-        };
-
         Array<MidiMessage> sqEsqMessages;
 
-        // Check if we are connected to an ESQ-1
         for (auto deviceIdMessage : deviceIdMessages) {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
-                if (deviceIdData[FAMILY] == SQ_ESQ_FAMILY_ID) {
-                    // If we find an ESQ-1, we don't need to check for the SQ-80 because the ESQ-1 has more hidden waves.
-                    if (deviceIdData[MODEL] == ESQ1_ID)
-                        return verifySysexEnabled(deviceIdMessage);
-                    else if (deviceIdData[MODEL] == SQ80_ID)
+                if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
+                    // If we find an ESQ-1, we don't need to check for others because the ESQ-1 has the most hidden waves.
+                    // This check will find ESQ-1s with OS version 3.00 and above.
+                    if (deviceIdData[MODEL_IDX] == ESQ1_ID)
+                        return getConnectionStatus(deviceIdMessage);
+                    else if (deviceIdData[MODEL_IDX] == ESQM_ID || deviceIdData[MODEL_IDX] == SQ80_ID)
                         sqEsqMessages.add(deviceIdMessage);
                 }
             }
         }
-        // Check if we are connected to an SQ-80 or ESQ-1, and if so, verify if SysEx is enabled
-        if (!sqEsqMessages.isEmpty())
-            return verifySysexEnabled(sqEsqMessages.getFirst());
-        else
-            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        // This will pass an empty message if we don't find any SQ-80/ESQ-1 that responded to the DeviceInquiry request
+        return getConnectionStatus(sqEsqMessages.getFirst());
+
     } else
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
 }
@@ -95,6 +84,19 @@ void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
     const unsigned char sb5Data[] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x2F, 0x62, 0xF7};
     MidiMessage sb5Message = MidiMessage::createSysExMessage(sb5Data, sizeof(sb5Data));
     selectedMidiOut->sendMessageNow(sb5Message);
+}
+
+DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
+    auto currentProg = requestProgramDump();
+
+    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE)
+        return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
+    else {
+        if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE)
+            return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
+        else
+            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+    }
 }
 
 DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveformIndex) {
