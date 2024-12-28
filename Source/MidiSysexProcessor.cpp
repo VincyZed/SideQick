@@ -50,11 +50,11 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         for (auto deviceIdMessage : deviceIdMessages) {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
-                if (deviceIdData[FAMILY] == SQ_ESQ_FAMILY) {
+                if (deviceIdData[FAMILY] == SQ_ESQ_FAMILY_ID) {
                     // If we find an ESQ-1, we don't need to check for the SQ-80 because the ESQ-1 has more hidden waves.
-                    if (deviceIdData[MODEL] == ESQ1)
+                    if (deviceIdData[MODEL] == ESQ1_ID)
                         return verifySysexEnabled(deviceIdMessage);
-                    else if (deviceIdData[MODEL] == SQ80)
+                    else if (deviceIdData[MODEL] == SQ80_ID)
                         sqEsqMessages.add(deviceIdMessage);
                 }
             }
