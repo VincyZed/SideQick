@@ -309,7 +309,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
                     waveMenus[osc].addItemList(waveMenuOpts, 1);
             }
             else {
-                //TODO: Disable the waveform menus if the synth doesn't support hidden waveforms
+                // TODO: Disable the waveform menus if the synth doesn't support hidden waveforms
             }
 
             if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)

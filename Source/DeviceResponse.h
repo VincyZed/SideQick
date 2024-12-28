@@ -30,7 +30,7 @@ const int SQ_ESQ_FAMILY_ID = 0x02;
 const int ESQ1_ID = 0x01;
 const int ESQM_ID = 0x02;
 const int SQ80_ID = 0x03;
-    
+
 
 class DeviceResponse {
   public:
@@ -66,12 +66,12 @@ class DeviceResponse {
                 model = ESQ1;
             else if (deviceIdData[ENSONIQ_MODEL] == ESQM_ID)
                 osVersion < 130 ? model = ESQM : model = SQ80M;
-            else 
+            else
                 deviceIdData[ENSONIQ_MODEL] == SQ80_ID ? model = SQ80 : model = UNKNOWN;
         } else
             model = UNKNOWN;
 
-        //TODO: Check this logic in case the ESQ-M or SQ-80M supports hidden waves
+        // TODO: Check this logic in case the ESQ-M or SQ-80M supports hidden waves
         if (model == ESQ1 && osVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM || model == SQ80M)
             supportsHiddenWaves = false;
     }
