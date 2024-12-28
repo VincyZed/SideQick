@@ -300,12 +300,16 @@ void MainComponent::updateStatus(DeviceResponse response) {
                 waveMenus[osc].clear(NO);
 
             waveMenuOpts = {"WAV0    to    WAV" + String(NB_OF_WAVES[currentModel] - 1)};
-            if (currentModel == SQ80 || currentModel == ESQ1 && response.osVersion >= ESQ1_HIDDEN_WAVES_MIN_VERSION) {
+            // Add hidden waveforms to the menu if the synth supports them
+            if (response.supportsHiddenWaves) {
                 for (int w = NB_OF_WAVES[currentModel]; w < 256; w++)
                     waveMenuOpts.add("WAV" + String(w));
 
                 for (int osc = 0; osc < 3; osc++)
                     waveMenus[osc].addItemList(waveMenuOpts, 1);
+            }
+            else {
+                //TODO: Disable the waveform menus if the synth doesn't support hidden waveforms
             }
 
             if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)
@@ -313,7 +317,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
         }
 
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
-
+        // Update the options in the display from the current program
         for (int osc = 0; osc < 3; osc++) {
             waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO);
             octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO);
@@ -432,6 +436,10 @@ SynthModel MainComponent::getCurrentSynthModel() const {
         return SQ80;
     else if (modelLabel.getText() == SYNTH_MODELS[ESQ1])
         return ESQ1;
+    else if (modelLabel.getText() == SYNTH_MODELS[ESQM])
+        return ESQM;
+    else if (modelLabel.getText() == SYNTH_MODELS[SQ80M])
+        return SQ80M;
     else
         return UNKNOWN;
 }

@@ -19,17 +19,25 @@ using namespace juce;
 
 enum Status { CONNECTED, DISCONNECTED, SYSEX_DISABLED, MODIFYING_PROGRAM, REFRESHING };
 const StringArray STATUS_MESSAGES = {"Connected", "Di5connected", "5y5ex    Di5abled", "Modifying    Program    .    .    .", "Refre5hing    .    .    ."};
-enum SynthModel { SQ80, ESQ1, UNKNOWN, UNCHANGED };
-const StringArray SYNTH_MODELS = {"5Q-80", "E5Q-1", "Unknown", "Unchanged"};
-const unsigned int NB_OF_WAVES[2] = {75, 32};
+enum SynthModel { SQ80, ESQ1, ESQM, SQ80M, UNKNOWN, UNCHANGED };
+const StringArray SYNTH_MODELS = {"5Q-80", "E5Q-1", "E5Q-M", "5Q-80M", "Unknown", "Unchanged"};
+const unsigned int NB_OF_WAVES[4] = {75, 32, 32, 75};
 
 const unsigned int ESQ1_HIDDEN_WAVES_MIN_VERSION = 350;
+
+const int SQ_ESQ_FAMILY_ID = 0x02;
+// Model codes. The SQ-80M has the same code as the ESQ-M
+const int ESQ1_ID = 0x01;
+const int ESQM_ID = 0x02;
+const int SQ80_ID = 0x03;
+    
 
 class DeviceResponse {
   public:
     String status = STATUS_MESSAGES[DISCONNECTED];
     unsigned int model = UNKNOWN;
     unsigned int osVersion = 0;
+    bool supportsHiddenWaves = true;
 
     MidiMessage currentProgram;
 
@@ -50,16 +58,22 @@ class DeviceResponse {
 
         const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
 
-        // TODO: Replace the literal values with constants
-        if (deviceIdData[ENSONIQ_FAMILY] == 0x02 && deviceIdData[ENSONIQ_MODEL] == 0x03)
-            this->model = SQ80;
-        else if (deviceIdData[ENSONIQ_FAMILY] == 0x02 && deviceIdData[ENSONIQ_MODEL] == 0x01)
-            this->model = ESQ1;
-        else
-            this->model = UNKNOWN;
-
-        // This returns an integer corresponding to the OS version, e.g. 353 for version 3.53
+        // OS version, e.g. 353 for version 3.53
         this->osVersion = deviceIdData[OS_VERSION[MAJOR]] * 100 + deviceIdData[OS_VERSION[MINOR]];
+
+        if (deviceIdData[ENSONIQ_FAMILY] == SQ_ESQ_FAMILY_ID) {
+            if (deviceIdData[ENSONIQ_MODEL] == ESQ1_ID)
+                model = ESQ1;
+            else if (deviceIdData[ENSONIQ_MODEL] == ESQM_ID)
+                osVersion < 130 ? model = ESQM : model = SQ80M;
+            else 
+                deviceIdData[ENSONIQ_MODEL] == SQ80_ID ? model = SQ80 : model = UNKNOWN;
+        } else
+            model = UNKNOWN;
+
+        //TODO: Check this logic in case the ESQ-M or SQ-80M supports hidden waves
+        if (model == ESQ1 && osVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM || model == SQ80M)
+            supportsHiddenWaves = false;
     }
 
   private:

@@ -42,16 +42,11 @@ class MidiSysexProcessor {
     // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
     const int FAMILY = 5;
     const int MODEL = 7;
-    const int OS_VERSION[2] = {11, 12}; // OS Version
-
-    const int SQ_ESQ_FAMILY = 0x02;
-    // Model codes for SQ-80 and ESQ-1
-    const int SQ80 = 0x03;
-    const int ESQ1 = 0x01;
+    const int OS_VERSION[2] = {11, 12};
 
     enum VersionNumber { MINOR, MAJOR };
 
-    // Subtract 2 to remove the SysEx header and footer
+    // We subtract 2 to exclude the SysEx header and footer
     const int DEVICE_ID_SIZE = 15 - 2;
     const int SQ_ESQ_PROG_SIZE = 210 - 2;
 
