@@ -307,8 +307,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
 
                 for (int osc = 0; osc < 3; osc++)
                     waveMenus[osc].addItemList(waveMenuOpts, 1);
-            }
-            else {
+            } else {
                 // TODO: Disable the waveform menus if the synth doesn't support hidden waveforms
             }
 
