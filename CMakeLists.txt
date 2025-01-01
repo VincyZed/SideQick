@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(SideQick VERSION 0.0.1)
 
-add_definitions(-D_WIN32_WINNT=0x0600) # Windows Vista or later
-
 # JUCE setup
 add_subdirectory(JUCE)
 
@@ -27,6 +25,8 @@ target_sources(SideQick
 # Add preprocessor definitions
 target_compile_definitions(SideQick
     PUBLIC
+        JUCE_DISPLAY_SPLASH_SCREEN=0
+        JUCE_REPORT_APP_USAGE=0
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
 )
