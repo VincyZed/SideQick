@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 project(SideQick VERSION 0.0.1)
 
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif()
+
 # JUCE setup
 add_subdirectory(JUCE)
 
