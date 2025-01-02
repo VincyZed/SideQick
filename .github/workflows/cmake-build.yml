@@ -7,7 +7,183 @@ on:
       - 'Assets/**'
       - 'Source/**'
   pull_request:
+    branches: [ main ]name: SideQick Build
+
+on:
+  push:
     branches: [ main ]
+    paths:
+      - 'Assets/**'
+      - 'Source/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual trigger
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: Build - ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: Linux
+            os: ubuntu-latest
+          - name: macOS
+            os: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+        build-essential \
+        cmake \
+        pkg-config \
+        libx11-dev \
+        libxrandr-dev \
+        libxinerama-dev \
+        libxcursor-dev \
+        libfreetype6-dev \
+        libfontconfig1-dev \
+        libasound2-dev
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build build --config ${{env.BUILD_TYPE}}
+
+    - name: Zip binary (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        powershell Compress-Archive -Path build/SideQick_artefacts/Release/SideQick.exe -DestinationPath build/SideQick_artefacts/Release/SideQick-win64.zip
+
+    - name: Zip binary (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        cd build/SideQick_artefacts/Release/
+        zip -r SideQick-macOS.zip SideQick.app
+
+    - name: Zip binary (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        zip -j build/SideQick_artefacts/Release/SideQick-linux.zip build/SideQick_artefacts/Release/SideQick
+
+    - name: Upload binary (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: SideQick-win64.zip
+        path: build/SideQick_artefacts/Release/SideQick-win64.zip
+
+    - name: Upload binary (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: SideQick-macOS.zip
+        path: build/SideQick_artefacts/Release/SideQick-macOS.zip
+    
+    - name: Upload binary (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: SideQick-linux.zip
+        path: build/SideQick_artefacts/Release/SideQick-linux.zip
+
+  create-pre-release:
+    name: Create Pre-Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: SideQick-win64.zip
+        path: build/SideQick_artefacts/Release
+
+    - name: Download macOS artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: SideQick-macOS.zip
+        path: build/SideQick_artefacts/Release
+
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: SideQick-linux.zip
+        path: build/SideQick_artefacts/Release
+
+    - name: Generate version number
+      id: version
+      shell: bash
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        BUILD_ID=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 5)
+        VERSION="${DATE}-${BUILD_ID}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      
+
+    - name: Create Pre-Release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        release_name: "Pre-Release ${{ steps.version.outputs.VERSION }}"
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset (Windows)
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/SideQick_artefacts/Release/SideQick-win64.zip
+        asset_name: SideQick-win64.zip
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset (macOS)
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/SideQick_artefacts/Release/SideQick-macOS.zip
+        asset_name: SideQick-macOS.zip
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Release Asset (Linux)
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/SideQick_artefacts/Release/SideQick-linux.zip
+        asset_name: SideQick-linux.zip
+        asset_content_type: application/octet-stream
   workflow_dispatch: # Allows manual trigger
 
 defaults:
