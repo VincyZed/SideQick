@@ -24,10 +24,11 @@ As it stands, SideQick provides easy access to illegal value ranges for the foll
 - An Ensoniq SQ-80 or ESQ-1 hardware synthesizer connected in MIDI to the computer **bidirectionaly**;
     - Make sure to enable SysEx on the unit by going into MIDI, then setting **KEYS+CT+PC+SS+SX** to ENABLE.
      - On the ESQ-1, currently OS version 3.0 or newer is needed to get recognized by SideQick. Version 3.5 or newer is required to access hidden waveforms, even through SideQick. More on that [here](http://buchty.net/ensoniq/hidden-wave.html).
-    - More testing is needed for ESQ-m support. It may or may not work.
+    - The ESQ-m and [SQ-80m](http://www.buchty.net/ensoniq/files/sq80m.pdf) are currently not supported, but will likely be soon.
 
  
 # Troubleshooting
+Known issues are listed [here](https://github.com/VincyZed/SideQick/issues). Otherwise, here are some steps in case you have trouble running SideQick.
 ## Windows
 - You may get a Microsoft Defender SmartScreen warning saying that SideQick is an unrecognized application and might put your PC at risk. Or course, **SideQick is not a virus**, so you can simply click on **More Info**, then **Run Anyway**.
 - If you get error messages about missing DLLs, you probably need to install the [Microsoft Visual C++ 2015 - 2022 Redistributable](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
@@ -55,6 +56,7 @@ Changes to the current program are thus applied and directly sent to the synth. 
 <br>
 
 # Building SideQick
+If you want to build SideQick from source yourself, here's the requirements and necessary steps. Otherwise if you just want to download and run the software, please refer to the [Downloads](#downloads) section.
 
 ## Installing dependencies
 Some dependencies are required to be able to build SideQick. First off, on any operating system, you will need to have [CMake](https://cmake.org/download/) installed.
