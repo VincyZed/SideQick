@@ -2,11 +2,6 @@ name: Clang-Format Check Workflow
 
 on:
   pull_request:
-    paths:
-      - '**/*.cpp'
-      - '**/*.hpp'
-      - '**/*.c'
-      - '**/*.h'
 
 jobs:
   clang-format:

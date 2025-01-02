@@ -106,13 +106,19 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     Colour menusTextColour = Colour::fromRGB(255, 255, 240);
 
     // Colours depending on the currently connected model. First is SQ-80, second is ESQ-1, then unknown.
-    const Colour backgroundColours[3][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
+    const Colour backgroundColours[5][2] = {{Colour::fromRGB(110, 110, 115), Colour::fromRGB(60, 60, 65)},
+                                            {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
+                                            {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
                                             {Colour::fromRGB(80, 80, 85), Colour::fromRGB(50, 50, 55)},
                                             {Colour::fromRGB(90, 90, 95), Colour::fromRGB(55, 55, 60)}};
-    const Colour accentColours[3] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(175, 175, 175)};
-    const Colour refreshButtonColours[3] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(175, 175, 175)};
-    const Colour importButtonColours[3] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(127, 0, 55)};
-    const Colour exportButtonColours[3] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175)};
+    const Colour accentColours[5] = {Colour::fromRGB(150, 0, 0), Colour::fromRGB(0, 150, 175), Colour::fromRGB(0, 150, 175), Colour::fromRGB(0, 150, 175),
+                                     Colour::fromRGB(175, 175, 175)};
+    const Colour refreshButtonColours[5] = {Colour::fromRGB(0, 180, 180), Colour::fromRGB(200, 150, 0), Colour::fromRGB(200, 150, 0), Colour::fromRGB(200, 150, 0),
+                                            Colour::fromRGB(175, 175, 175)};
+    const Colour importButtonColours[5] = {Colour::fromRGB(127, 0, 55), Colour::fromRGB(30, 30, 30), Colour::fromRGB(30, 30, 30), Colour::fromRGB(30, 30, 30),
+                                           Colour::fromRGB(127, 0, 55)};
+    const Colour exportButtonColours[5] = {Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175), Colour::fromRGB(175, 175, 175),
+                                           Colour::fromRGB(175, 175, 175)};
 
     const float separatorThickness = 10.0f;
 
