@@ -65,9 +65,9 @@ Typeface::Ptr DisplayLookAndFeel::getCustomTypeface() {
     return customTypeface;
 }
 
-Font DisplayLookAndFeel::getLabelFont(Label& label) { return Font(FontOptions(getCustomTypeface())); }
+Font DisplayLookAndFeel::getLabelFont(Label& label) { return Font(getCustomTypeface()); }
 
-Font DisplayLookAndFeel::getPopupMenuFont() { return Font(FontOptions(getCustomTypeface()).withHeight(12.0f)); }
+Font DisplayLookAndFeel::getPopupMenuFont() { return Font(getCustomTypeface()).withHeight(12.0f); }
 
 void DisplayLookAndFeel::drawComboBox(Graphics& g, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) {
     // Draw the background
@@ -94,7 +94,7 @@ void DisplayLookAndFeel::drawToggleButton(Graphics& g, ToggleButton& button, boo
     auto tickWidth = fontSize * 1.1f;
 
     g.setColour(button.findColour(ToggleButton::textColourId));
-    g.setFont(Font(FontOptions(getCustomTypeface()).withHeight(fontSize)));
+    g.setFont(Font(getCustomTypeface()).withHeight(fontSize));
 
     auto textBounds = button.getLocalBounds().reduced((int)tickWidth, 0);
     g.drawFittedText(button.getButtonText(), textBounds, Justification::centredLeft, 10);
