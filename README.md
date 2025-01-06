@@ -6,7 +6,7 @@ SideQick is a software companion to be used with Ensoniq SQ-80 or ESQ-1 hardware
 
 # Downloads
 
-Downloads for Windows, macOS and Linux are available from the [Releases page](https://github.com/VincyZed/SideQick/tags).
+Downloads for Windows, macOS and Linux are available from the [Releases page](https://github.com/VincyZed/SideQick/releases/latest).
 
 <br>
 
