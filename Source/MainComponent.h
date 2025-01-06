@@ -46,7 +46,6 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     void updateStatus(DeviceResponse response);
     void attemptConnection();
     void refreshMidiDevices(bool allowMenuSwitch = false);
-    void updateTheme();
     void timerCallback() override;
     SynthModel getCurrentSynthModel() const;
     //==============================================================================

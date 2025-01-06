@@ -224,13 +224,25 @@ void MainComponent::releaseResources() {}
 //==============================================================================
 
 void MainComponent::paint(Graphics& g) {
-    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0,
-                                     backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1],
-                                     (float)(windowWidth / 2), (float)windowHeight, true));
+
+    refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel
+                                                    : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                           : selectedThemeOption - 1]);
+
+    Colour gradientColours[2];
+    for (int i = 0; i < 2; i++) {
+        gradientColours[i] = backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                                               : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                      : selectedThemeOption - 1][i];
+    }
+
+    g.setGradientFill(ColourGradient(gradientColours[0], 0, 0, gradientColours[1], (float)(windowWidth / 2), (float)windowHeight, true));
     g.fillAll();
 
     // Top red line
-    g.setColour(accentColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1]);
+    g.setColour(accentColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                              : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                     : selectedThemeOption - 1]);
     g.drawLine(0, 0, (float)windowWidth, 0, (float)(separatorThickness * 1.5));
 
     // Thin red lines under logo
@@ -262,7 +274,7 @@ void MainComponent::showContextMenu() {
             themeSubMenu.addSeparator();
         themeSubMenu.addItem(PopupMenu::Item(THEME_OPTIONS[themeOption]).setTicked(selectedThemeOption == themeOption).setAction([themeOption, this]() {
             selectedThemeOption = themeOption;
-            updateTheme();
+            repaint();
         }));
     }
 
@@ -312,7 +324,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
             }
 
             if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)
-                updateTheme();
+                repaint();
         }
 
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
@@ -347,7 +359,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
             currentModel = getCurrentSynthModel();
             if (selectedThemeOption == AUTOMATIC_THEME)
-                updateTheme();
+                repaint();
         }
         modelLabel.setBounds(modelLabelXPos + 55, modelLabel.getY(), modelLabel.getWidth(), modelLabel.getHeight());
         modelLabel.setVisible(true);
@@ -414,11 +426,6 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
         midiOutMenu.setSelectedItemIndex(midiOutDeviceNames.indexOf(currentDevice) + 1, NO);
     else
         midiOutMenu.setSelectedItemIndex(allowMenuSwitch && midiOutDeviceNames.size() > 0 ? 1 : 0, sendNotification);
-}
-
-void MainComponent::updateTheme() {
-    refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel : selectedThemeOption - 1]);
-    repaint();
 }
 
 void MainComponent::timerCallback() {
