@@ -99,11 +99,11 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
                 midiProcessor.selectedMidiIn = MidiInput::openDevice(device.identifier, this);
                 if (midiProcessor.selectedMidiIn) {
                     midiProcessor.selectedMidiIn->start();
-                    attemptConnection();
                 }
                 break;
             }
         }
+        attemptConnection();
     };
 
     midiOutMenu.setBounds(540, 55, 240, 25);
@@ -375,7 +375,8 @@ void MainComponent::attemptConnection() {
             auto response = midiProcessor.requestDeviceInquiry();
             MessageManager::callAsync([this, response] { updateStatus(response); });
         });
-    }
+    } else
+        updateStatus(DeviceResponse(STATUS_MESSAGES[DISCONNECTED]));
 }
 
 void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
@@ -396,7 +397,7 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
         midiInMenu.setSelectedItemIndex(midiInDeviceNames.indexOf(currentDevice) + 1, NO);
     else
         // Select the first device in the list if the previously selected device is not available,
-        // or None if no input devices are available or we don't changing the context menu value
+        // or None if no input devices are available or we don't change the context menu value
         midiInMenu.setSelectedItemIndex(allowMenuSwitch && midiInDeviceNames.size() > 0 ? 1 : 0, sendNotification);
 
     // Check for MIDI output devices and populate the combo box
