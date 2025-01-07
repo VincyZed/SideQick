@@ -295,14 +295,27 @@ void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessa
 
 void MainComponent::updateStatus(DeviceResponse response) {
 
+    auto updateStatusLabel = [this](const String& text, bool center) {
+        statusLabel.setText(text, NO);
+        statusLabel.setBounds(center ? 560 : 500, 5, 300, 30);
+    };
+    auto updateModelLabel = [this](String& status) {
+        modelLabel.setVisible(status == STATUS_MESSAGES[CONNECTED] || status == STATUS_MESSAGES[SYSEX_DISABLED]);
+        modelLabel.setBounds(status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
+                             modelLabel.getHeight());
+    };
+    auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
+        midiControls.setEnabled(midiControlsEnabled);
+        programControls.setEnabled(programControlsEnabled);
+        display.toggleProgramSection(programSectionOn ? ON : OFF);
+        disconnectedUnderline.setVisible(status == STATUS_MESSAGES[DISCONNECTED]);
+        sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
+    };
+
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
-        statusLabel.setText(STATUS_MESSAGES[CONNECTED] + "    to    ", NO);
 
         if (response.model != UNCHANGED && response.model != UNKNOWN)
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
-
-        modelLabel.setBounds(modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(), modelLabel.getHeight());
-        modelLabel.setVisible(true);
 
         currentModel = getCurrentSynthModel();
 
@@ -337,47 +350,28 @@ void MainComponent::updateStatus(DeviceResponse response) {
         }
         selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO);
 
-        statusLabel.setBounds(500, 5, 300, 30);
-        programControls.setEnabled(true);
-        midiControls.setEnabled(true);
-        disconnectedUnderline.setVisible(false);
-        sysexDisabledUnderline.setVisible(false);
-        display.toggleProgramSection(ON);
+        updateStatusLabel(STATUS_MESSAGES[CONNECTED] + "    to    ", false);
+        setGroupComponents(response.status, true, true, true);
+
     } else if (response.status == STATUS_MESSAGES[DISCONNECTED]) {
-        statusLabel.setBounds(560, 5, 300, 30);
-        statusLabel.setText(STATUS_MESSAGES[DISCONNECTED], NO);
-        modelLabel.setVisible(false);
+        updateStatusLabel(STATUS_MESSAGES[DISCONNECTED], true);
         programNameLabel.setText("______", NO);
-        midiControls.setEnabled(true);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        sysexDisabledUnderline.setVisible(false);
+        setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[SYSEX_DISABLED]) {
-        statusLabel.setBounds(500, 5, 300, 30);
-        statusLabel.setText(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", NO);
+        updateStatusLabel(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", false);
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
             currentModel = getCurrentSynthModel();
             if (selectedThemeOption == AUTOMATIC_THEME)
                 repaint();
         }
-        modelLabel.setBounds(modelLabelXPos + 55, modelLabel.getY(), modelLabel.getWidth(), modelLabel.getHeight());
-        modelLabel.setVisible(true);
-        programNameLabel.setText("______", NO);
-        midiControls.setEnabled(true);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        disconnectedUnderline.setVisible(false);
+        setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] || response.status == STATUS_MESSAGES[REFRESHING]) {
-        response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] ? statusLabel.setBounds(500, 5, 300, 30) : statusLabel.setBounds(560, 5, 300, 30);
-        statusLabel.setText(response.status, NO);
-        modelLabel.setVisible(false);
-        midiControls.setEnabled(false);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        disconnectedUnderline.setVisible(false);
-        sysexDisabledUnderline.setVisible(false);
+        updateStatusLabel(response.status, response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] ? false : true);
+        setGroupComponents(response.status, false, false, false);
     }
+
+    updateModelLabel(response.status);
 }
 
 void MainComponent::attemptConnection() {

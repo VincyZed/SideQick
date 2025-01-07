@@ -20,7 +20,7 @@ using namespace juce;
 enum Status { CONNECTED, DISCONNECTED, SYSEX_DISABLED, MODIFYING_PROGRAM, REFRESHING };
 const StringArray STATUS_MESSAGES = {"Connected", "Di5connected", "5y5ex    Di5abled", "Modifying    Program    .    .    .", "Refre5hing    .    .    ."};
 enum SynthModel { SQ80, ESQ1, ESQM, SQ80M, UNKNOWN, UNCHANGED };
-const StringArray SYNTH_MODELS = {"5Q-80", "E5Q-1", "E5Q-M", "5Q-80M", "Unknown", "Unchanged"};
+const StringArray SYNTH_MODELS = {"5Q-80", "E5Q-1", "E5Q-M", "5Q80M", "Unknown", "Unchanged"};
 const unsigned int NB_OF_WAVES[4] = {75, 32, 32, 75};
 
 const int SQ_ESQ_FAMILY_ID = 0x02;
