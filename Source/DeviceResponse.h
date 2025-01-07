@@ -42,6 +42,8 @@ class DeviceResponse {
   public:
     String status = STATUS_MESSAGES[DISCONNECTED];
     unsigned int model = UNKNOWN;
+    String majorOsVersion;
+    String minorOsVersion;
     bool supportsHiddenWaves = true;
 
     MidiMessage currentProgram;
@@ -65,25 +67,37 @@ class DeviceResponse {
         // Check if a supported model responded to the DeviceInquiry request
         if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
 
-            unsigned int osVersion = deviceIdData[OS_VERSION_IDX[MAJOR]] * 100 + deviceIdData[OS_VERSION_IDX[MINOR]];
+            majorOsVersion = static_cast<String>(deviceIdData[OS_VERSION_IDX[MAJOR]]);
+            minorOsVersion = static_cast<String>(deviceIdData[OS_VERSION_IDX[MINOR]]);
+            unsigned int combinedOsVersion = deviceIdData[OS_VERSION_IDX[MAJOR]] * 100 + deviceIdData[OS_VERSION_IDX[MINOR]];
 
             if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
-                if (deviceIdData[MODEL_IDX] == ESQ1_ID)
+                if (deviceIdData[MODEL_IDX] == ESQ1_ID) {
                     model = ESQ1;
-                else if (deviceIdData[MODEL_IDX] == ESQM_ID)
-                    osVersion < 130 ? model = ESQM : model = SQ80M;
-                else
-                    deviceIdData[MODEL_IDX] == SQ80_ID ? model = SQ80 : model = UNKNOWN;
+                    // An ESQ-1 with OS 3.53 will unfortunately report 3.50, so the tooltip must indicate that both are possible
+                    minorOsVersion = majorOsVersion == "3" && minorOsVersion == "50" ? "50/53" : minorOsVersion;
+                } else if (deviceIdData[MODEL_IDX] == ESQM_ID)
+                    // After looking at the SQ-80M OS's assembly, an SQ-80M with os v1.30 will report 1.30. We can thus distinguish the ESQ-M from the SQ-80M!
+                    combinedOsVersion < 130 ? model = ESQM : model = SQ80M;
+                else if (deviceIdData[MODEL_IDX] == SQ80_ID) {
+                    model = SQ80;
+                    // An SQ-80 with OS 1.81 will unfortunately report 1.80, so the tooltip must indicate that both are possible
+                    minorOsVersion = majorOsVersion == "1" && minorOsVersion == "80" ? "80/81" : minorOsVersion;
+                } else
+                    model = UNKNOWN;
             } else
                 model = UNKNOWN;
 
             // TODO: Check this logic in case the ESQ-M or SQ-80M supports hidden waves
-            if (model == ESQ1 && osVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM || model == SQ80M)
+            if (model == ESQ1 && combinedOsVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM || model == SQ80M)
                 supportsHiddenWaves = false;
 
-        } else if (deviceIdMessage.getSysExDataSize() == 0)
-            // ESQ-1 with OS version lower than 3.00, since we already received a valid program dump
+        } else if (deviceIdMessage.getSysExDataSize() == 0) {
+            // ESQ-1 (since we already received a valid program dump but not an inquiry response) with OS version lower than 3.00 (we can't know the exact version)
             model = ESQ1;
+            majorOsVersion = "< 3";
+            minorOsVersion = "00";
+        }
     }
 
   private:

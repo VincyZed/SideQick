@@ -67,12 +67,12 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     // createLabel(programNameLabel, programControls, "______", 210, 5, 300, 30);
     // ==================== Status Section =====================
 
+    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
+    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
     createLabel(statusTitleLabel, statusSection, "5tatu5    =", 398, 5, 250, 30);
     createLabel(statusLabel, statusSection, "Di5connected", 560, 5, 300, 30);
     createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
-    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
-    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
-
+    sysexDisabledUnderline.setVisible(false);
 
     refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
     refreshButton.onClick = [this] {
@@ -299,10 +299,11 @@ void MainComponent::updateStatus(DeviceResponse response) {
         statusLabel.setText(text, NO);
         statusLabel.setBounds(center ? 560 : 500, 5, 300, 30);
     };
-    auto updateModelLabel = [this](String& status) {
-        modelLabel.setVisible(status == STATUS_MESSAGES[CONNECTED] || status == STATUS_MESSAGES[SYSEX_DISABLED]);
-        modelLabel.setBounds(status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
+    auto updateModelLabel = [this](DeviceResponse response) {
+        modelLabel.setVisible(response.status == STATUS_MESSAGES[CONNECTED] || response.status == STATUS_MESSAGES[SYSEX_DISABLED]);
+        modelLabel.setBounds(response.status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
                              modelLabel.getHeight());
+        modelLabel.setTooltip("Operating System version: " + response.majorOsVersion + "." + response.minorOsVersion);
     };
     auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
         midiControls.setEnabled(midiControlsEnabled);
@@ -367,11 +368,11 @@ void MainComponent::updateStatus(DeviceResponse response) {
         }
         setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] || response.status == STATUS_MESSAGES[REFRESHING]) {
-        updateStatusLabel(response.status, response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] ? false : true);
+        updateStatusLabel(response.status, response.status == STATUS_MESSAGES[REFRESHING]);
         setGroupComponents(response.status, false, false, false);
     }
 
-    updateModelLabel(response.status);
+    updateModelLabel(response);
 }
 
 void MainComponent::attemptConnection() {
