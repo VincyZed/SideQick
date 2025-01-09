@@ -48,6 +48,7 @@ class Display : public GroupComponent {
     void resized() override;
 
     void toggleProgramSection(DisplayState state);
+    void toggleComponent(Component& component, DisplayState state);
 
   private:
     DisplayLookAndFeel displayLookAndFeel;

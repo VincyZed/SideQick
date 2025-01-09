@@ -303,7 +303,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
         modelLabel.setVisible(response.status == STATUS_MESSAGES[CONNECTED] || response.status == STATUS_MESSAGES[SYSEX_DISABLED]);
         modelLabel.setBounds(response.status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
                              modelLabel.getHeight());
-        modelLabel.setTooltip("Operating System version: " + response.majorOsVersion + "." + response.minorOsVersion);
+        modelLabel.setTooltip("Operating System version: " + response.osVersion[MAJOR] + "." + response.osVersion[MINOR]);
     };
     auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
         midiControls.setEnabled(midiControlsEnabled);
@@ -312,6 +312,9 @@ void MainComponent::updateStatus(DeviceResponse response) {
         disconnectedUnderline.setVisible(status == STATUS_MESSAGES[DISCONNECTED]);
         sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
     };
+
+    osVersion[MAJOR] = response.osVersion[MAJOR];
+    osVersion[MINOR] = response.osVersion[MINOR];
 
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
 
@@ -331,10 +334,20 @@ void MainComponent::updateStatus(DeviceResponse response) {
                 for (int w = NB_OF_WAVES[currentModel]; w < 256; w++)
                     waveMenuOpts.add("WAV" + String(w));
 
-                for (int osc = 0; osc < 3; osc++)
+                for (int osc = 0; osc < 3; osc++) {
                     waveMenus[osc].addItemList(waveMenuOpts, 1);
+                    waveMenus[osc].setTooltip("Waveform for oscillator " + String(osc + 1) + ":\nThe first option is normal waveforms, the rest are hidden waveforms.");
+                }
             } else {
-                // TODO: Disable the waveform menus if the synth doesn't support hidden waveforms
+                for (int osc = 0; osc < 3; osc++) {
+                    display.toggleComponent(waveMenus[osc], OFF);
+                    waveMenus[osc].setTextWhenNothingSelected("Un5upported");
+                    if (currentModel == ESQ1)
+                        waveMenus[osc].setTooltip("Hidden waveforms are only accessible with OS version 3.5 and above on the ESQ-1");
+                    else
+                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the " +
+                                                  String(SYNTH_MODELS[currentModel] == SYNTH_MODELS[ESQM] ? "ESQ-M" : "SQ80-M"));
+                }
             }
 
             if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)

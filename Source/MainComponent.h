@@ -92,6 +92,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
 
     SynthModel currentModel;
+    String osVersion[2];
     enum Oscillators { OSC1, OSC2, OSC3 };
 
 
