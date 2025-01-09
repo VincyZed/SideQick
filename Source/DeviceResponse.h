@@ -80,8 +80,8 @@ class DeviceResponse {
                     combinedOsVersion < 130 ? model = ESQM : model = SQ80M;
                 else if (deviceIdData[MODEL_IDX] == SQ80_ID) {
                     model = SQ80;
-                    // An SQ-80 with OS 1.81 will unfortunately report 1.80, so the tooltip must indicate that both are possible
-                    osVersion[MINOR] = osVersion[MAJOR] == "1" && osVersion[MINOR] == "80" ? "80/81" : osVersion[MINOR];
+                    // An SQ-80 with OS 1.83 will unfortunately report 1.80, so the tooltip must indicate that both are possible
+                    osVersion[MINOR] = osVersion[MAJOR] == "1" && osVersion[MINOR] == "80" ? "80/83" : osVersion[MINOR];
                 } else
                     model = UNKNOWN;
             } else
