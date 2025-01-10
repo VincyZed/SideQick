@@ -31,7 +31,7 @@ As it stands, SideQick provides easy access to illegal value ranges for the foll
 Known issues are listed [here](https://github.com/VincyZed/SideQick/issues). Otherwise, here are some steps in case you have trouble running SideQick.
 ## Windows
 - You may get a Microsoft Defender SmartScreen warning saying that SideQick is an unrecognized application and might put your PC at risk. Or course, **SideQick is not a virus**, so you can simply click on **More Info**, then **Run Anyway**.
-- If you get error messages about missing DLLs, you probably need to install the [Microsoft Visual C++ 2015 - 2022 Redistributable](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
+- If nothing happens when launching SideQick or you get error messages about missing DLLs, you probably need to install the [Microsoft Visual C++ 2015 - 2022 Redistributable](https://answers.microsoft.com/en-us/windows/forum/all/vcruntime140dll-and-msvcp140dll-missing-in-windows/caf454d1-49f4-4d2b-b74a-c83fb7c38625).
 
 ## macOS
 As with other software from unverified developers, you may need to [allow applications from **Anywhere**](https://discussions.apple.com/thread/255759797?answerId=260852615022&sortBy=rank#260852615022) to be run. You may also need to run the `xattr -c <path/to/SideQick.app>` command if you get an error message saying that SideQick is *damaged*.
