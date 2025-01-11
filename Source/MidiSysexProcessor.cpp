@@ -90,7 +90,6 @@ void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
 
 DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
 
-    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(10);
     MidiMessage currentProg = requestProgramDump();
     bool receivedValidDeviceId = deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE;
     bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
