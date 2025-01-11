@@ -28,6 +28,7 @@ void MidiSysexProcessor::processIncomingMidiData(MidiInput* source, const MidiMe
 String MidiSysexProcessor::getChannel() { return String(requestPgmDumpMsg[CHANNEL_IDX] + 1); }
 
 void MidiSysexProcessor::setChannel(int channel) {
+    intButtonMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
     requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
     sb5Msg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
 }
@@ -86,6 +87,7 @@ MidiMessage MidiSysexProcessor::requestProgramDump() {
 void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
     // Create a new SysEx message with the modified data
     MidiMessage modifiedProgram = MidiMessage::createSysExMessage(progData, SQ_ESQ_PROG_SIZE);
+    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(intButtonMsg, sizeof(intButtonMsg)));
     selectedMidiOut->sendMessageNow(modifiedProgram);
     selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sb5Msg, sizeof(sb5Msg)));
 }
