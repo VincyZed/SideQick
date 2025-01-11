@@ -25,45 +25,44 @@ void MidiSysexProcessor::processIncomingMidiData(MidiInput* source, const MidiMe
         receivedSysExMessages.add(message);
 }
 
+String MidiSysexProcessor::getChannel() { return String(requestPgmDumpMsg[CHANNEL_IDX] + 1); }
+
+void MidiSysexProcessor::setChannel(int channel) {
+    intButtonMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+    sb5Msg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+}
+
 DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
     if (selectedMidiOut != nullptr) {
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID, sizeof(REQUEST_ID)));
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID_MSG, sizeof(REQUEST_ID_MSG)));
         Thread::sleep(SYSEX_DELAY);
 
         // There may be more than one device that responds to the DeviceInquiry request, since it's part of the MIDI standard.
-        // We need to get all the responses and check if any of them are from an SQ-80 or ESQ-1.
+        // We need to get all the responses and check if any of them are from an SQ-80/ESQ-1 family of synths.
         Array<MidiMessage> deviceIdMessages = receivedSysExMessages;
         receivedSysExMessages.clear();
 
-        auto verifySysexEnabled = [this](MidiMessage deviceIdMessage) {
-            auto currentProg = requestProgramDump();
-            if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE)
-                return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
-            else {
-                return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
-            }
-        };
-
         Array<MidiMessage> sqEsqMessages;
 
-        // Check if we are connected to an ESQ-1
         for (auto deviceIdMessage : deviceIdMessages) {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
-                if (deviceIdData[FAMILY] == SQ_ESQ_FAMILY) {
-                    // If we find an ESQ-1, we don't need to check for the SQ-80 because the ESQ-1 has more hidden waves.
-                    if (deviceIdData[MODEL] == ESQ1)
-                        return verifySysexEnabled(deviceIdMessage);
-                    else if (deviceIdData[MODEL] == SQ80)
+                if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
+                    setChannel(deviceIdData[RESPONSE_CHANNEL_IDX]);
+
+                    // If we find an ESQ-1, we don't need to check for others because the ESQ-1 has the most hidden waves.
+                    // This check will find ESQ-1s with OS version 3.00 and above.
+                    if (deviceIdData[MODEL_IDX] == ESQ1_ID)
+                        return getConnectionStatus(deviceIdMessage);
+                    else if (deviceIdData[MODEL_IDX] == ESQM_ID || deviceIdData[MODEL_IDX] == SQ80_ID)
                         sqEsqMessages.add(deviceIdMessage);
                 }
             }
         }
-        // Check if we are connected to an SQ-80 or ESQ-1, and if so, verify if SysEx is enabled
-        if (!sqEsqMessages.isEmpty())
-            return verifySysexEnabled(sqEsqMessages.getFirst());
-        else
-            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        // This will pass an empty message if we don't find any SQ-80/ESQ-1 that responded to the DeviceInquiry request
+        return getConnectionStatus(sqEsqMessages.getFirst());
+
     } else
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
 }
@@ -71,8 +70,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
 MidiMessage MidiSysexProcessor::requestProgramDump() {
     // Send the program dump request
     if (selectedMidiOut != nullptr) {
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_PGM_DUMP_PT_1, sizeof(REQUEST_PGM_DUMP_PT_1)));
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_PGM_DUMP_PT_2, sizeof(REQUEST_PGM_DUMP_PT_2)));
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(requestPgmDumpMsg, sizeof(requestPgmDumpMsg)));
     }
 
     Thread::sleep(SYSEX_DELAY);
@@ -89,12 +87,35 @@ MidiMessage MidiSysexProcessor::requestProgramDump() {
 void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
     // Create a new SysEx message with the modified data
     MidiMessage modifiedProgram = MidiMessage::createSysExMessage(progData, SQ_ESQ_PROG_SIZE);
+    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(intButtonMsg, sizeof(intButtonMsg)));
     selectedMidiOut->sendMessageNow(modifiedProgram);
+    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sb5Msg, sizeof(sb5Msg)));
+}
 
-    // Create and send a message immediately to press Soft Button 5 (exit program save prompt)
-    const unsigned char sb5Data[] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x2F, 0x62, 0xF7};
-    MidiMessage sb5Message = MidiMessage::createSysExMessage(sb5Data, sizeof(sb5Data));
-    selectedMidiOut->sendMessageNow(sb5Message);
+DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
+
+    MidiMessage currentProg = requestProgramDump();
+    bool receivedValidDeviceId = deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE;
+    bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+
+    // This is to set the right MIDI channel for the ESQ-1 with OS < 3.00
+    if (!receivedValidDeviceId && !receivedValidProgram) {
+        for (int channel = 0; channel < 16 && !receivedValidProgram; channel++) {
+            setChannel(channel);
+            currentProg = requestProgramDump();
+            receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+        }
+    }
+
+    if (receivedValidProgram)
+        return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
+    else {
+        if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE)
+            return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
+        else
+            // This will be the response for ESQ-1s with OS < 3.00 which are connected correctly but with SysEx disabled
+            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+    }
 }
 
 DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveformIndex) {

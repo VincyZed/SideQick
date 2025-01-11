@@ -67,12 +67,12 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     // createLabel(programNameLabel, programControls, "______", 210, 5, 300, 30);
     // ==================== Status Section =====================
 
+    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
+    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
     createLabel(statusTitleLabel, statusSection, "5tatu5    =", 398, 5, 250, 30);
     createLabel(statusLabel, statusSection, "Di5connected", 560, 5, 300, 30);
     createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
-    createLabel(disconnectedUnderline, statusSection, "____________", 560, 10, 300, 30);
-    createLabel(sysexDisabledUnderline, statusSection, "_______________________", 500, 10, 300, 30);
-
+    sysexDisabledUnderline.setVisible(false);
 
     refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
     refreshButton.onClick = [this] {
@@ -99,11 +99,11 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
                 midiProcessor.selectedMidiIn = MidiInput::openDevice(device.identifier, this);
                 if (midiProcessor.selectedMidiIn) {
                     midiProcessor.selectedMidiIn->start();
-                    attemptConnection();
                 }
                 break;
             }
         }
+        attemptConnection();
     };
 
     midiOutMenu.setBounds(540, 55, 240, 25);
@@ -224,13 +224,25 @@ void MainComponent::releaseResources() {}
 //==============================================================================
 
 void MainComponent::paint(Graphics& g) {
-    g.setGradientFill(ColourGradient(backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][0], 0, 0,
-                                     backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1][1],
-                                     (float)(windowWidth / 2), (float)windowHeight, true));
+
+    refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel
+                                                    : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                           : selectedThemeOption - 1]);
+
+    Colour gradientColours[2];
+    for (int i = 0; i < 2; i++) {
+        gradientColours[i] = backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                                               : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                      : selectedThemeOption - 1][i];
+    }
+
+    g.setGradientFill(ColourGradient(gradientColours[0], 0, 0, gradientColours[1], (float)(windowWidth / 2), (float)windowHeight, true));
     g.fillAll();
 
     // Top red line
-    g.setColour(accentColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel() : selectedThemeOption - 1]);
+    g.setColour(accentColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                              : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                     : selectedThemeOption - 1]);
     g.drawLine(0, 0, (float)windowWidth, 0, (float)(separatorThickness * 1.5));
 
     // Thin red lines under logo
@@ -262,7 +274,7 @@ void MainComponent::showContextMenu() {
             themeSubMenu.addSeparator();
         themeSubMenu.addItem(PopupMenu::Item(THEME_OPTIONS[themeOption]).setTicked(selectedThemeOption == themeOption).setAction([themeOption, this]() {
             selectedThemeOption = themeOption;
-            updateTheme();
+            repaint();
         }));
     }
 
@@ -272,7 +284,7 @@ void MainComponent::showContextMenu() {
     menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
         if (result == 2) {
             AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
-                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 1.1\n\nCopyright Vincent Zauhar, 2024\nReleased under the "
+                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 2.0\n\nCopyright Vincent Zauhar, 2025\nReleased under the "
                                              "GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
@@ -283,14 +295,32 @@ void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessa
 
 void MainComponent::updateStatus(DeviceResponse response) {
 
+    auto updateStatusLabel = [this](const String& text, bool center) {
+        statusLabel.setText(text, NO);
+        statusLabel.setBounds(center ? 560 : 500, 5, 300, 30);
+    };
+    auto updateModelLabel = [this](DeviceResponse response) {
+        modelLabel.setVisible(response.status == STATUS_MESSAGES[CONNECTED] || response.status == STATUS_MESSAGES[SYSEX_DISABLED]);
+        modelLabel.setBounds(response.status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
+                             modelLabel.getHeight());
+        modelLabel.setTooltip("MIDI channel: " + midiProcessor.getChannel() + "\nSystem version: " + osVersion[MAJOR] + "." + osVersion[MINOR]);
+    };
+    auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
+        midiControls.setEnabled(midiControlsEnabled);
+        programControls.setEnabled(programControlsEnabled);
+        display.toggleProgramSection(programSectionOn ? ON : OFF);
+        disconnectedUnderline.setVisible(status == STATUS_MESSAGES[DISCONNECTED]);
+        sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
+    };
+
+
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
-        statusLabel.setText(STATUS_MESSAGES[CONNECTED] + "    to    ", NO);
 
-        if (response.model != UNCHANGED && response.model != UNKNOWN)
+        if (response.model != UNCHANGED && response.model != UNKNOWN) {
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
-
-        modelLabel.setBounds(modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(), modelLabel.getHeight());
-        modelLabel.setVisible(true);
+            osVersion[MAJOR] = response.osVersion[MAJOR];
+            osVersion[MINOR] = response.osVersion[MINOR];
+        }
 
         currentModel = getCurrentSynthModel();
 
@@ -300,20 +330,33 @@ void MainComponent::updateStatus(DeviceResponse response) {
                 waveMenus[osc].clear(NO);
 
             waveMenuOpts = {"WAV0    to    WAV" + String(NB_OF_WAVES[currentModel] - 1)};
-            if (currentModel == SQ80 || currentModel == ESQ1 && response.osVersion >= ESQ1_HIDDEN_WAVES_MIN_VERSION) {
+            // Add hidden waveforms to the menu if the synth supports them
+            if (response.supportsHiddenWaves) {
                 for (int w = NB_OF_WAVES[currentModel]; w < 256; w++)
                     waveMenuOpts.add("WAV" + String(w));
 
-                for (int osc = 0; osc < 3; osc++)
+                for (int osc = 0; osc < 3; osc++) {
                     waveMenus[osc].addItemList(waveMenuOpts, 1);
+                    waveMenus[osc].setTooltip("Waveform for oscillator " + String(osc + 1) + ":\nThe first option is normal waveforms, the rest are hidden waveforms.");
+                }
+            } else {
+                for (int osc = 0; osc < 3; osc++) {
+                    display.toggleComponent(waveMenus[osc], OFF);
+                    waveMenus[osc].setTextWhenNothingSelected("Un5upported");
+                    if (currentModel == ESQ1)
+                        waveMenus[osc].setTooltip("Hidden waveforms are only accessible with OS version 3.5 and above on the ESQ-1");
+                    else
+                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the " +
+                                                  String(SYNTH_MODELS[currentModel] == SYNTH_MODELS[ESQM] ? "ESQ-M" : "SQ80-M"));
+                }
             }
 
             if (selectedThemeOption == AUTOMATIC_THEME && response.model != UNKNOWN)
-                updateTheme();
+                repaint();
         }
 
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
-
+        // Update the options in the display from the current program
         for (int osc = 0; osc < 3; osc++) {
             waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO);
             octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO);
@@ -322,47 +365,28 @@ void MainComponent::updateStatus(DeviceResponse response) {
         }
         selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO);
 
-        statusLabel.setBounds(500, 5, 300, 30);
-        programControls.setEnabled(true);
-        midiControls.setEnabled(true);
-        disconnectedUnderline.setVisible(false);
-        sysexDisabledUnderline.setVisible(false);
-        display.toggleProgramSection(ON);
+        updateStatusLabel(STATUS_MESSAGES[CONNECTED] + "    to    ", false);
+        setGroupComponents(response.status, true, true, true);
+
     } else if (response.status == STATUS_MESSAGES[DISCONNECTED]) {
-        statusLabel.setBounds(560, 5, 300, 30);
-        statusLabel.setText(STATUS_MESSAGES[DISCONNECTED], NO);
-        modelLabel.setVisible(false);
+        updateStatusLabel(STATUS_MESSAGES[DISCONNECTED], true);
         programNameLabel.setText("______", NO);
-        midiControls.setEnabled(true);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        sysexDisabledUnderline.setVisible(false);
+        setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[SYSEX_DISABLED]) {
-        statusLabel.setBounds(500, 5, 300, 30);
-        statusLabel.setText(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", NO);
+        updateStatusLabel(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", false);
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
             currentModel = getCurrentSynthModel();
             if (selectedThemeOption == AUTOMATIC_THEME)
-                updateTheme();
+                repaint();
         }
-        modelLabel.setBounds(modelLabelXPos + 55, modelLabel.getY(), modelLabel.getWidth(), modelLabel.getHeight());
-        modelLabel.setVisible(true);
-        programNameLabel.setText("______", NO);
-        midiControls.setEnabled(true);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        disconnectedUnderline.setVisible(false);
+        setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] || response.status == STATUS_MESSAGES[REFRESHING]) {
-        response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] ? statusLabel.setBounds(500, 5, 300, 30) : statusLabel.setBounds(560, 5, 300, 30);
-        statusLabel.setText(response.status, NO);
-        modelLabel.setVisible(false);
-        midiControls.setEnabled(false);
-        programControls.setEnabled(false);
-        display.toggleProgramSection(OFF);
-        disconnectedUnderline.setVisible(false);
-        sysexDisabledUnderline.setVisible(false);
+        updateStatusLabel(response.status, response.status == STATUS_MESSAGES[REFRESHING]);
+        setGroupComponents(response.status, false, false, false);
     }
+
+    updateModelLabel(response);
 }
 
 void MainComponent::attemptConnection() {
@@ -372,7 +396,8 @@ void MainComponent::attemptConnection() {
             auto response = midiProcessor.requestDeviceInquiry();
             MessageManager::callAsync([this, response] { updateStatus(response); });
         });
-    }
+    } else
+        updateStatus(DeviceResponse(STATUS_MESSAGES[DISCONNECTED]));
 }
 
 void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
@@ -393,7 +418,7 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
         midiInMenu.setSelectedItemIndex(midiInDeviceNames.indexOf(currentDevice) + 1, NO);
     else
         // Select the first device in the list if the previously selected device is not available,
-        // or None if no input devices are available or we don't changing the context menu value
+        // or None if no input devices are available or we don't change the context menu value
         midiInMenu.setSelectedItemIndex(allowMenuSwitch && midiInDeviceNames.size() > 0 ? 1 : 0, sendNotification);
 
     // Check for MIDI output devices and populate the combo box
@@ -412,11 +437,6 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
         midiOutMenu.setSelectedItemIndex(allowMenuSwitch && midiOutDeviceNames.size() > 0 ? 1 : 0, sendNotification);
 }
 
-void MainComponent::updateTheme() {
-    refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel : selectedThemeOption - 1]);
-    repaint();
-}
-
 void MainComponent::timerCallback() {
     // Blink the underline on status errors
     if (statusLabel.getText() == STATUS_MESSAGES[DISCONNECTED])
@@ -432,6 +452,10 @@ SynthModel MainComponent::getCurrentSynthModel() const {
         return SQ80;
     else if (modelLabel.getText() == SYNTH_MODELS[ESQ1])
         return ESQ1;
+    else if (modelLabel.getText() == SYNTH_MODELS[ESQM])
+        return ESQM;
+    else if (modelLabel.getText() == SYNTH_MODELS[SQ80M])
+        return SQ80M;
     else
         return UNKNOWN;
 }
@@ -452,7 +476,7 @@ void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const 
     comboBox.setSelectedItemIndex(0, NO);
     comboBox.setBounds(x, y, width, height);
     comboBox.setTooltip(tooltip);
-    comboBox.setText("");
+    comboBox.setText("", NO);
     parent.addAndMakeVisible(comboBox);
     comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
 }

@@ -62,42 +62,26 @@ jobs:
     - name: Build
       run: cmake --build build --config ${{env.BUILD_TYPE}}
 
-    - name: Zip binary (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        powershell Compress-Archive -Path build/SideQick_artefacts/Release/SideQick.exe -DestinationPath build/SideQick_artefacts/Release/SideQick-win64.zip
-
-    - name: Zip binary (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        cd build/SideQick_artefacts/Release/
-        zip -r SideQick-macOS.zip SideQick.app
-
-    - name: Zip binary (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        zip -j build/SideQick_artefacts/Release/SideQick-linux.zip build/SideQick_artefacts/Release/SideQick
-
     - name: Upload binary (Windows)
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-win64.zip
-        path: build/SideQick_artefacts/Release/SideQick-win64.zip
+        name: SideQick-win64
+        path: build/SideQick_artefacts/Release/SideQick.exe
 
     - name: Upload binary (macOS)
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-macOS.zip
-        path: build/SideQick_artefacts/Release/SideQick-macOS.zip
+        name: SideQick-macOS
+        path: build/SideQick_artefacts/Release/SideQick.app
     
     - name: Upload binary (Linux)
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: SideQick-linux.zip
-        path: build/SideQick_artefacts/Release/SideQick-linux.zip
+        name: SideQick-linux
+        path: build/SideQick_artefacts/Release/SideQick
 
   create-pre-release:
     name: Create Pre-Release

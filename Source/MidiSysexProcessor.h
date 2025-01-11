@@ -21,6 +21,8 @@ using namespace juce;
 
 class MidiSysexProcessor {
   public:
+    const int CHANNEL_IDX = 3;
+
     std::unique_ptr<MidiInput> selectedMidiIn;
     std::unique_ptr<MidiOutput> selectedMidiOut;
 
@@ -33,31 +35,25 @@ class MidiSysexProcessor {
     DeviceResponse changeOscWaveform(int oscNumber, int waveformIndex);
     DeviceResponse changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange);
     DeviceResponse toggleLowFrequencyMode(int oscNumber, bool lowFreqEnabled);
+    String getChannel();
+    void setChannel(int channel);
 
   private:
+    // Channel 1 by default
+    unsigned char intButtonMsg[7] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x26, 0xF7};
+    unsigned char requestPgmDumpMsg[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
+    unsigned char sb5Msg[8] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x2F, 0x62, 0xF7};
+
     Array<MidiMessage> receivedSysExMessages;
 
-    const int SYSEX_DELAY = 800;
-
-    // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
-    const int FAMILY = 5;
-    const int MODEL = 7;
-    const int OS_VERSION[2] = {11, 12}; // OS Version
-
-    const int SQ_ESQ_FAMILY = 0x02;
-    // Model codes for SQ-80 and ESQ-1
-    const int SQ80 = 0x03;
-    const int ESQ1 = 0x01;
+    const int SYSEX_DELAY = 700;
 
     enum VersionNumber { MINOR, MAJOR };
 
-    // Subtract 2 to remove the SysEx header and footer
-    const int DEVICE_ID_SIZE = 15 - 2;
+    // We subtract 2 to exclude the SysEx header and footer
     const int SQ_ESQ_PROG_SIZE = 210 - 2;
 
-    const unsigned char REQUEST_ID[6] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
-    const unsigned char REQUEST_PGM_DUMP_PT_1[7] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x26, 0xF7};
-    const unsigned char REQUEST_PGM_DUMP_PT_2[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
+    const unsigned char REQUEST_ID_MSG[6] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
 
     // If we have toggleable ranges, this is to remember the values for each state. The ones here are the default values
     uint8_t resValuesNormal[2] = {0x0, 0x1};
@@ -70,4 +66,6 @@ class MidiSysexProcessor {
     // For the low-frequency mode
     uint8_t pitchToggleNormal[3][2] = {{0x4, 0x2}, {0x4, 0x2}, {0x4, 0x2}};
     uint8_t pitchToggleLowFreq[3][2] = {{0xC, 0x8}, {0xC, 0x8}, {0xC, 0x8}};
+
+    DeviceResponse getConnectionStatus(MidiMessage deviceIdMessage);
 };

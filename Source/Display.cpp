@@ -44,6 +44,14 @@ void Display::toggleProgramSection(DisplayState state) {
     displayLookAndFeel.setColour(Label::textColourId, DISPLAY_COLOURS[state]);
 }
 
+void Display::toggleComponent(Component& component, DisplayState state) {
+    component.setEnabled(state == ON);
+    component.setColour(ComboBox::outlineColourId, DISPLAY_COLOURS[state]);
+    component.setColour(ComboBox::textColourId, DISPLAY_COLOURS[state]);
+    component.setColour(ComboBox::arrowColourId, DISPLAY_COLOURS[state]);
+    component.repaint();
+}
+
 DisplayLookAndFeel::DisplayLookAndFeel() {
     displayColour = DISPLAY_COLOURS[ON];
     setDefaultSansSerifTypeface(getCustomTypeface());
