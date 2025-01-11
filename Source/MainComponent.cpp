@@ -284,7 +284,7 @@ void MainComponent::showContextMenu() {
     menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
         if (result == 2) {
             AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
-                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 1.1\n\nCopyright Vincent Zauhar, 2024\nReleased under the "
+                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 2.0\n\nCopyright Vincent Zauhar, 2025\nReleased under the "
                                              "GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
