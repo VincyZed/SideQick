@@ -25,6 +25,13 @@ void MidiSysexProcessor::processIncomingMidiData(MidiInput* source, const MidiMe
         receivedSysExMessages.add(message);
 }
 
+String MidiSysexProcessor::getChannel() { return String(requestPgmDumpMsg[CHANNEL_IDX] + 1); }
+
+void MidiSysexProcessor::setChannel(int channel) {
+    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+    sb5Msg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+}
+
 DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
     if (selectedMidiOut != nullptr) {
         selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID_MSG, sizeof(REQUEST_ID_MSG)));
@@ -41,8 +48,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
                 if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
-                    // Set the MIDI channel to the one that responded to the DeviceInquiry request
-                    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(deviceIdData[RESPONSE_CHANNEL_IDX]);
+                    setChannel(deviceIdData[RESPONSE_CHANNEL_IDX]);
 
                     // If we find an ESQ-1, we don't need to check for others because the ESQ-1 has the most hidden waves.
                     // This check will find ESQ-1s with OS version 3.00 and above.
@@ -81,11 +87,7 @@ void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
     // Create a new SysEx message with the modified data
     MidiMessage modifiedProgram = MidiMessage::createSysExMessage(progData, SQ_ESQ_PROG_SIZE);
     selectedMidiOut->sendMessageNow(modifiedProgram);
-
-    // Create and send a message immediately to press Soft Button 5 (exit program save prompt)
-    const unsigned char sb5Data[] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x2F, 0x62, 0xF7};
-    MidiMessage sb5Message = MidiMessage::createSysExMessage(sb5Data, sizeof(sb5Data));
-    selectedMidiOut->sendMessageNow(sb5Message);
+    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sb5Msg, sizeof(sb5Msg)));
 }
 
 DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
@@ -97,7 +99,7 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
     // This is to set the right MIDI channel for the ESQ-1 with OS < 3.00
     if (!receivedValidDeviceId && !receivedValidProgram) {
         for (int channel = 0; channel < 16 && !receivedValidProgram; channel++) {
-            requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+            setChannel(channel);
             currentProg = requestProgramDump();
             receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
         }

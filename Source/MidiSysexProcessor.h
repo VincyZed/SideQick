@@ -21,7 +21,6 @@ using namespace juce;
 
 class MidiSysexProcessor {
   public:
-    unsigned char requestPgmDumpMsg[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
     const int CHANNEL_IDX = 3;
 
     std::unique_ptr<MidiInput> selectedMidiIn;
@@ -36,8 +35,14 @@ class MidiSysexProcessor {
     DeviceResponse changeOscWaveform(int oscNumber, int waveformIndex);
     DeviceResponse changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange);
     DeviceResponse toggleLowFrequencyMode(int oscNumber, bool lowFreqEnabled);
+    String getChannel();
+    void setChannel(int channel);
 
   private:
+    // Channel 0 by default
+    unsigned char requestPgmDumpMsg[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
+    unsigned char sb5Msg[8] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x2F, 0x62, 0xF7};
+
     Array<MidiMessage> receivedSysExMessages;
 
     const int SYSEX_DELAY = 700;

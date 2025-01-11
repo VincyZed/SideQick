@@ -303,8 +303,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
         modelLabel.setVisible(response.status == STATUS_MESSAGES[CONNECTED] || response.status == STATUS_MESSAGES[SYSEX_DISABLED]);
         modelLabel.setBounds(response.status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
                              modelLabel.getHeight());
-        modelLabel.setTooltip("MIDI channel: " + String(midiProcessor.requestPgmDumpMsg[midiProcessor.CHANNEL_IDX] + 1) +
-                              "\nSystem version: " + response.osVersion[MAJOR] + "." + response.osVersion[MINOR]);
+        modelLabel.setTooltip("MIDI channel: " + midiProcessor.getChannel() + "\nSystem version: " + osVersion[MAJOR] + "." + osVersion[MINOR]);
     };
     auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
         midiControls.setEnabled(midiControlsEnabled);
@@ -314,13 +313,14 @@ void MainComponent::updateStatus(DeviceResponse response) {
         sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
     };
 
-    osVersion[MAJOR] = response.osVersion[MAJOR];
-    osVersion[MINOR] = response.osVersion[MINOR];
 
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
 
-        if (response.model != UNCHANGED && response.model != UNKNOWN)
+        if (response.model != UNCHANGED && response.model != UNKNOWN) {
             modelLabel.setText(SYNTH_MODELS[response.model], NO);
+            osVersion[MAJOR] = response.osVersion[MAJOR];
+            osVersion[MINOR] = response.osVersion[MINOR];
+        }
 
         currentModel = getCurrentSynthModel();
 
