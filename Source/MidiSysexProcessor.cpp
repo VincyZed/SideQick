@@ -27,7 +27,7 @@ void MidiSysexProcessor::processIncomingMidiData(MidiInput* source, const MidiMe
 
 DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
     if (selectedMidiOut != nullptr) {
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID, sizeof(REQUEST_ID)));
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID_MSG, sizeof(REQUEST_ID_MSG)));
         Thread::sleep(SYSEX_DELAY);
 
         // There may be more than one device that responds to the DeviceInquiry request, since it's part of the MIDI standard.
@@ -41,6 +41,9 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
                 if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
+                    // Set the MIDI channel to the one that responded to the DeviceInquiry request
+                    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(deviceIdData[RESPONSE_CHANNEL_IDX]);
+
                     // If we find an ESQ-1, we don't need to check for others because the ESQ-1 has the most hidden waves.
                     // This check will find ESQ-1s with OS version 3.00 and above.
                     if (deviceIdData[MODEL_IDX] == ESQ1_ID)
@@ -60,8 +63,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
 MidiMessage MidiSysexProcessor::requestProgramDump() {
     // Send the program dump request
     if (selectedMidiOut != nullptr) {
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_PGM_DUMP_PT_1, sizeof(REQUEST_PGM_DUMP_PT_1)));
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_PGM_DUMP_PT_2, sizeof(REQUEST_PGM_DUMP_PT_2)));
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(requestPgmDumpMsg, sizeof(requestPgmDumpMsg)));
     }
 
     Thread::sleep(SYSEX_DELAY);
@@ -87,14 +89,28 @@ void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
 }
 
 DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
-    auto currentProg = requestProgramDump();
 
-    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE)
+    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(10);
+    MidiMessage currentProg = requestProgramDump();
+    bool receivedValidDeviceId = deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE;
+    bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+
+    // This is to set the right MIDI channel for the ESQ-1 with OS < 3.00
+    if (!receivedValidDeviceId && !receivedValidProgram) {
+        for (int channel = 0; channel < 16 && !receivedValidProgram; channel++) {
+            requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
+            currentProg = requestProgramDump();
+            receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+        }
+    }
+
+    if (receivedValidProgram)
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
     else {
         if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE)
             return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
         else
+            // This will be the response for ESQ-1s with OS < 3.00 which are connected correctly but with SysEx disabled
             return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
     }
 }

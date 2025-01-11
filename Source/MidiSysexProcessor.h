@@ -21,6 +21,9 @@ using namespace juce;
 
 class MidiSysexProcessor {
   public:
+    unsigned char requestPgmDumpMsg[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
+    const int CHANNEL_IDX = 3;
+
     std::unique_ptr<MidiInput> selectedMidiIn;
     std::unique_ptr<MidiOutput> selectedMidiOut;
 
@@ -37,16 +40,14 @@ class MidiSysexProcessor {
   private:
     Array<MidiMessage> receivedSysExMessages;
 
-    const int SYSEX_DELAY = 800;
+    const int SYSEX_DELAY = 700;
 
     enum VersionNumber { MINOR, MAJOR };
 
     // We subtract 2 to exclude the SysEx header and footer
     const int SQ_ESQ_PROG_SIZE = 210 - 2;
 
-    const unsigned char REQUEST_ID[6] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
-    const unsigned char REQUEST_PGM_DUMP_PT_1[7] = {0xF0, 0x0F, 0x02, 0x00, 0x0E, 0x26, 0xF7};
-    const unsigned char REQUEST_PGM_DUMP_PT_2[6] = {0xF0, 0x0F, 0x02, 0x00, 0x09, 0xF7};
+    const unsigned char REQUEST_ID_MSG[6] = {0xF0, 0x7E, 0x7F, 0x06, 0x01, 0xF7};
 
     // If we have toggleable ranges, this is to remember the values for each state. The ones here are the default values
     uint8_t resValuesNormal[2] = {0x0, 0x1};

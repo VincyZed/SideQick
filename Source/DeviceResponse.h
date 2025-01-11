@@ -33,6 +33,7 @@ const int SQ80_ID = 0x03;
 const int DEVICE_ID_SIZE = 15 - 2;
 
 // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
+const int RESPONSE_CHANNEL_IDX = 1;
 const int FAMILY_IDX = 5;
 const int MODEL_IDX = 7;
 const int OS_VERSION_IDX[2] = {11, 12};

@@ -303,7 +303,8 @@ void MainComponent::updateStatus(DeviceResponse response) {
         modelLabel.setVisible(response.status == STATUS_MESSAGES[CONNECTED] || response.status == STATUS_MESSAGES[SYSEX_DISABLED]);
         modelLabel.setBounds(response.status == STATUS_MESSAGES[SYSEX_DISABLED] ? modelLabelXPos + 55 : modelLabelXPos, modelLabel.getY(), modelLabel.getWidth(),
                              modelLabel.getHeight());
-        modelLabel.setTooltip("Operating System version: " + response.osVersion[MAJOR] + "." + response.osVersion[MINOR]);
+        modelLabel.setTooltip("MIDI channel: " + String(midiProcessor.requestPgmDumpMsg[midiProcessor.CHANNEL_IDX] + 1) +
+                              "\nSystem version: " + response.osVersion[MAJOR] + "." + response.osVersion[MINOR]);
     };
     auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
         midiControls.setEnabled(midiControlsEnabled);
@@ -475,7 +476,7 @@ void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const 
     comboBox.setSelectedItemIndex(0, NO);
     comboBox.setBounds(x, y, width, height);
     comboBox.setTooltip(tooltip);
-    comboBox.setText("");
+    comboBox.setText("", NO);
     parent.addAndMakeVisible(comboBox);
     comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
 }
