@@ -89,7 +89,7 @@ class DeviceResponse {
                 model = UNKNOWN;
 
             // TODO: Check this logic in case the ESQ-M or SQ-80M supports hidden waves
-            if (model == ESQ1 && combinedOsVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM || model == SQ80M)
+            if (model == ESQ1 && combinedOsVersion < ESQ1_HIDDEN_WAVES_MIN_VERSION || model == ESQM)
                 supportsHiddenWaves = false;
 
         } else if (deviceIdMessage.getSysExDataSize() == 0) {
