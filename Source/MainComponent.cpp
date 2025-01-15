@@ -346,8 +346,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
                     if (currentModel == ESQ1)
                         waveMenus[osc].setTooltip("Hidden waveforms are only accessible with OS version 3.5 and above on the ESQ-1");
                     else
-                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the " +
-                                                  String(SYNTH_MODELS[currentModel] == SYNTH_MODELS[ESQM] ? "ESQ-M" : "SQ80-M"));
+                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the ESQ-M");
                 }
             }
 
