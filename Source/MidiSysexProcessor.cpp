@@ -67,13 +67,13 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
 }
 
-MidiMessage MidiSysexProcessor::requestProgramDump() {
+MidiMessage MidiSysexProcessor::requestProgramDump(int delay) {
     // Send the program dump request
     if (selectedMidiOut != nullptr) {
         selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(requestPgmDumpMsg, sizeof(requestPgmDumpMsg)));
     }
 
-    Thread::sleep(SYSEX_DELAY);
+    Thread::sleep(delay);
 
     // Read the incoming SysEx message
     auto program = receivedSysExMessages.getFirst();
@@ -94,7 +94,7 @@ void MidiSysexProcessor::sendProgramDump(HeapBlock<uint8_t>& progData) {
 
 DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
 
-    MidiMessage currentProg = requestProgramDump();
+    MidiMessage currentProg = requestProgramDump(SYSEX_DELAY);
     bool receivedValidDeviceId = deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE;
     bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
 
@@ -102,7 +102,7 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
     if (!receivedValidDeviceId && !receivedValidProgram) {
         for (int channel = 0; channel < 16 && !receivedValidProgram; channel++) {
             setChannel(channel);
-            currentProg = requestProgramDump();
+            currentProg = requestProgramDump(SYSEX_DELAY / 4);
             receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
         }
     }
@@ -119,7 +119,7 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
 }
 
 DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveformIndex) {
-    auto currentProg = requestProgramDump();
+    auto currentProg = requestProgramDump(SYSEX_DELAY);
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
@@ -144,7 +144,7 @@ DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveform
 
 DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange) {
 
-    auto currentProg = requestProgramDump();
+    auto currentProg = requestProgramDump(SYSEX_DELAY);
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
@@ -202,7 +202,7 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lo
     // It sets the oscillator in a different frequency range, a bit like what toggleSelfOscillation() does for resonance.
     // Here we set it to OCT-2 by default because OCT-3 is still a very high frequency but from a different waveform, because... reasons.
 
-    auto currentProg = requestProgramDump();
+    auto currentProg = requestProgramDump(SYSEX_DELAY);
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
@@ -242,7 +242,7 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lo
 }
 
 DeviceResponse MidiSysexProcessor::toggleSelfOscillation(ToggleButton& selfOscButton) {
-    auto currentProg = requestProgramDump();
+    auto currentProg = requestProgramDump(SYSEX_DELAY);
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth

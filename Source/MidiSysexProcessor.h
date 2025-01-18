@@ -29,7 +29,7 @@ class MidiSysexProcessor {
     void processIncomingMidiData(MidiInput* source, const MidiMessage& message);
 
     DeviceResponse requestDeviceInquiry();
-    MidiMessage requestProgramDump();
+    MidiMessage requestProgramDump(int delay);
     void sendProgramDump(HeapBlock<uint8_t>& progData);
     DeviceResponse toggleSelfOscillation(ToggleButton& selfOscButton);
     DeviceResponse changeOscWaveform(int oscNumber, int waveformIndex);
