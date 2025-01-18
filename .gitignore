@@ -64,6 +64,9 @@ cmake-stamp
 # CMake
 build/
 cmake-build*/
+CMakeCache.txt
+CMakeFiles/
+
 
 # Juce (a submodule should be added)
 libs/juce-*

@@ -13,6 +13,7 @@
  */
 
 #include "MainComponent.h"
+#include "BinaryData.h"
 #include "DeviceResponse.h"
 #include "MidiSysexProcessor.h"
 #include "PannelButton.h"
