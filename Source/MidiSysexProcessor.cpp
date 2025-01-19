@@ -64,7 +64,8 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         return getConnectionStatus(sqEsqMessages.getFirst());
 
     } else
-        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        // On launch, the program will try to connect to the synth automatically, so this displays the "refreshing" message
+        return DeviceResponse(STATUS_MESSAGES[REFRESHING]);
 }
 
 MidiMessage MidiSysexProcessor::requestProgramDump(int delay) {

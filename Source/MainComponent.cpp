@@ -75,7 +75,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
     sysexDisabledUnderline.setVisible(false);
 
-    refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
+    refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1 and for MIDI device changes");
     refreshButton.onClick = [this] {
         attemptConnection();
         refreshMidiDevices();
