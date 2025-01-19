@@ -13,6 +13,7 @@
  */
 
 #include "MainComponent.h"
+#include "BinaryData.h"
 #include "DeviceResponse.h"
 #include "MidiSysexProcessor.h"
 #include "PannelButton.h"
@@ -74,7 +75,7 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
     sysexDisabledUnderline.setVisible(false);
 
-    refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1");
+    refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1 and for MIDI device changes");
     refreshButton.onClick = [this] {
         attemptConnection();
         refreshMidiDevices();
@@ -284,7 +285,7 @@ void MainComponent::showContextMenu() {
     menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
         if (result == 2) {
             AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "SideQick",
-                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 2.0\n\nCopyright Vincent Zauhar, 2025\nReleased under the "
+                                             "Ensoniq SQ-80/ESQ-1 Expansion Software\nVersion Beta 2.1\n\nCopyright Vincent Zauhar, 2025\nReleased under the "
                                              "GNU GPL v3 license\n\nhttps://github.com/VincyZed/SideQick");
         } else if (result == 3)
             JUCEApplication::getInstance()->systemRequestedQuit();
@@ -346,8 +347,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
                     if (currentModel == ESQ1)
                         waveMenus[osc].setTooltip("Hidden waveforms are only accessible with OS version 3.5 and above on the ESQ-1");
                     else
-                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the " +
-                                                  String(SYNTH_MODELS[currentModel] == SYNTH_MODELS[ESQM] ? "ESQ-M" : "SQ80-M"));
+                        waveMenus[osc].setTooltip("Hidden waveforms are not supported on the ESQ-M");
                 }
             }
 
