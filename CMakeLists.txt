@@ -12,6 +12,8 @@ add_subdirectory(JUCE)
 juce_add_gui_app(SideQick
     PRODUCT_NAME "SideQick"
     COMPANY_NAME "VincentZauhar"
+    ICON_BIG "Assets/icon.svg"
+    ICON_SMALL "Assets/icon.svg"
 )
 
 # Add source files
@@ -38,7 +40,7 @@ target_compile_definitions(SideQick
 # Add binary data
 juce_add_binary_data(SideQickBinaryData SOURCES
     Assets/DSEG14Classic-Italic.ttf
-    Assets/logo.svg    
+    Assets/logo.svg
     Assets/plastic.png
 )
 
