@@ -48,21 +48,14 @@ class DeviceResponse {
 
     MidiMessage currentProgram;
 
-    // This constructor should be called when we set the status to Disconnected
-    DeviceResponse(String status) {
-        this->status = status;
-        this->model = UNCHANGED;
-    }
+    // This constructor should be called when we set the status to Refreshing or Disconnected
     DeviceResponse(String status, MidiMessage currentProgram) {
         this->status = status;
-        this->model = UNCHANGED;
         this->currentProgram = currentProgram;
+        this->model = UNCHANGED;
     }
     // This constructor should be called when we set the status to Connected or Sysex Disabled
-    DeviceResponse(String status, MidiMessage deviceIdMessage, MidiMessage currentProgram) {
-        this->status = status;
-        this->currentProgram = currentProgram;
-
+    DeviceResponse(String status, MidiMessage deviceIdMessage, MidiMessage currentProgram) : DeviceResponse(status, currentProgram) {
         const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
         // Check if a supported model responded to the DeviceInquiry request
         if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {

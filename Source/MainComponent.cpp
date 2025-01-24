@@ -26,7 +26,7 @@ PlasticTexture::PlasticTexture(const Image& textureImage) : textureImage(texture
 
 void PlasticTexture::paint(Graphics& g) {
     if (textureImage.isValid()) {
-        g.setOpacity(0.125f);
+        g.setOpacity(0.13f);
         g.drawImage(textureImage, getLocalBounds().toFloat());
     }
 }
@@ -391,13 +391,13 @@ void MainComponent::updateStatus(DeviceResponse response) {
 
 void MainComponent::attemptConnection() {
     if (midiInMenu.getSelectedItemIndex() > 0 && midiOutMenu.getSelectedItemIndex() > 0) {
-        updateStatus(DeviceResponse(STATUS_MESSAGES[REFRESHING]));
+        updateStatus(DeviceResponse(STATUS_MESSAGES[REFRESHING], NO_PROG));
         Thread::launch([this] {
             auto response = midiProcessor.requestDeviceInquiry();
             MessageManager::callAsync([this, response] { updateStatus(response); });
         });
     } else
-        updateStatus(DeviceResponse(STATUS_MESSAGES[DISCONNECTED]));
+        updateStatus(DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG));
 }
 
 void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
@@ -490,7 +490,7 @@ void MainComponent::createToggleButton(ToggleButton& button, Component& parent, 
 }
 
 void MainComponent::displayControlOnChange(const std::function<DeviceResponse()>& onChangeFunc) {
-    updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM]));
+    updateStatus(DeviceResponse(STATUS_MESSAGES[MODIFYING_PROGRAM], NO_PROG));
     Thread::launch([this, &onChangeFunc] {
         DeviceResponse status = onChangeFunc();
         MessageManager::callAsync([this, status] { updateStatus(status); });

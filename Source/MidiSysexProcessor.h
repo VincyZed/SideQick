@@ -19,6 +19,8 @@
 
 using namespace juce;
 
+static const MidiMessage NO_PROG = MidiMessage();
+
 class MidiSysexProcessor {
   public:
     const int CHANNEL_IDX = 3;

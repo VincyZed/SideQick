@@ -65,7 +65,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
 
     } else
         // On launch, the program will try to connect to the synth automatically, so this displays the "refreshing" message
-        return DeviceResponse(STATUS_MESSAGES[REFRESHING]);
+        return DeviceResponse(STATUS_MESSAGES[REFRESHING], NO_PROG);
 }
 
 MidiMessage MidiSysexProcessor::requestProgramDump(int delay) {
@@ -115,7 +115,7 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
             return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
         else
             // This will be the response for ESQ-1s with OS < 3.00 which are connected correctly but with SysEx disabled
-            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+            return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
     }
 }
 
@@ -140,7 +140,7 @@ DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveform
         MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData, SQ_ESQ_PROG_SIZE);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProg);
     } else
-        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
 }
 
 DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange) {
@@ -195,7 +195,7 @@ DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int
         MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData, SQ_ESQ_PROG_SIZE);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProg);
     } else
-        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
 }
 
 DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lowFreqEnabled) {
@@ -239,7 +239,7 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lo
         MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modifiedprogData, SQ_ESQ_PROG_SIZE);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProgram);
     } else
-        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
 }
 
 DeviceResponse MidiSysexProcessor::toggleSelfOscillation(ToggleButton& selfOscButton) {
@@ -277,6 +277,6 @@ DeviceResponse MidiSysexProcessor::toggleSelfOscillation(ToggleButton& selfOscBu
         MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modProgData, SQ_ESQ_PROG_SIZE);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProgram);
     } else {
-        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED]);
+        return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
     }
 }
