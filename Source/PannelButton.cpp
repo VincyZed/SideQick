@@ -25,7 +25,7 @@ PannelButton::PannelButton(const Colour& color, const String& text, const int& x
     setBounds(xPos, yPos, buttonWidth, buttonHeight);
     setOutline(Colours::black.withAlpha(0.75f), 1);
 
-    label.setText(text, NO);
+    label.setText(text, NO_NOTIF);
     label.setJustificationType(Justification::centred);
     label.attachToComponent(this, true);
     label.setColour(Label::textColourId, buttonTextColour);

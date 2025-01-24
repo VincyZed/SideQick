@@ -297,7 +297,7 @@ void MainComponent::handleIncomingMidiMessage(MidiInput* source, const MidiMessa
 void MainComponent::updateStatus(DeviceResponse response) {
 
     auto updateStatusLabel = [this](const String& text, bool center) {
-        statusLabel.setText(text, NO);
+        statusLabel.setText(text, NO_NOTIF);
         statusLabel.setBounds(center ? 560 : 500, 5, 300, 30);
     };
     auto updateModelLabel = [this](DeviceResponse response) {
@@ -318,7 +318,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
 
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
-            modelLabel.setText(SYNTH_MODELS[response.model], NO);
+            modelLabel.setText(SYNTH_MODELS[response.model], NO_NOTIF);
             osVersion[MAJOR] = response.osVersion[MAJOR];
             osVersion[MINOR] = response.osVersion[MINOR];
         }
@@ -328,7 +328,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
         if (response.model != UNCHANGED) {
             // Update the waveforms in the menus
             for (int osc = 0; osc < 3; osc++)
-                waveMenus[osc].clear(NO);
+                waveMenus[osc].clear(NO_NOTIF);
 
             waveMenuOpts = {"WAV0    to    WAV" + String(NB_OF_WAVES[currentModel] - 1)};
             // Add hidden waveforms to the menu if the synth supports them
@@ -358,24 +358,24 @@ void MainComponent::updateStatus(DeviceResponse response) {
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
         // Update the options in the display from the current program
         for (int osc = 0; osc < 3; osc++) {
-            waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO);
-            octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO);
-            semiMenus[osc].setSelectedItemIndex(parameterValues.currentRealSemi[osc], NO);
-            LFButtons[osc].setToggleState(parameterValues.currentOscLF[osc], NO);
+            waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO_NOTIF);
+            octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO_NOTIF);
+            semiMenus[osc].setSelectedItemIndex(parameterValues.currentRealSemi[osc], NO_NOTIF);
+            LFButtons[osc].setToggleState(parameterValues.currentOscLF[osc], NO_NOTIF);
         }
-        selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO);
+        selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO_NOTIF);
 
         updateStatusLabel(STATUS_MESSAGES[CONNECTED] + "    to    ", false);
         setGroupComponents(response.status, true, true, true);
 
     } else if (response.status == STATUS_MESSAGES[DISCONNECTED]) {
         updateStatusLabel(STATUS_MESSAGES[DISCONNECTED], true);
-        programNameLabel.setText("______", NO);
+        programNameLabel.setText("______", NO_NOTIF);
         setGroupComponents(response.status, true, false, false);
     } else if (response.status == STATUS_MESSAGES[SYSEX_DISABLED]) {
         updateStatusLabel(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", false);
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
-            modelLabel.setText(SYNTH_MODELS[response.model], NO);
+            modelLabel.setText(SYNTH_MODELS[response.model], NO_NOTIF);
             currentModel = getCurrentSynthModel();
             if (selectedThemeOption == AUTOMATIC_THEME)
                 repaint();
@@ -410,12 +410,12 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
     }
 
     String currentDevice = midiInMenu.getText();
-    midiInMenu.clear(NO);
+    midiInMenu.clear(NO_NOTIF);
     midiInMenu.addItem("None", 1);
     midiInMenu.addItemList(midiInDeviceNames, 2);
     if (midiInDeviceNames.contains(currentDevice) && currentDevice != "None")
         // Select the previously selected MIDI input device if it's still available
-        midiInMenu.setSelectedItemIndex(midiInDeviceNames.indexOf(currentDevice) + 1, NO);
+        midiInMenu.setSelectedItemIndex(midiInDeviceNames.indexOf(currentDevice) + 1, NO_NOTIF);
     else
         // Select the first device in the list if the previously selected device is not available,
         // or None if no input devices are available or we don't change the context menu value
@@ -427,12 +427,12 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
             midiOutDeviceNames.add(device.name);
     }
     currentDevice = midiOutMenu.getText();
-    midiOutMenu.clear(NO);
+    midiOutMenu.clear(NO_NOTIF);
     midiOutMenu.addItem("None", 1);
     midiOutMenu.addItemList(midiOutDeviceNames, 2);
     if (midiOutDeviceNames.contains(currentDevice) && currentDevice != "None")
         // Same thing but for the output device.
-        midiOutMenu.setSelectedItemIndex(midiOutDeviceNames.indexOf(currentDevice) + 1, NO);
+        midiOutMenu.setSelectedItemIndex(midiOutDeviceNames.indexOf(currentDevice) + 1, NO_NOTIF);
     else
         midiOutMenu.setSelectedItemIndex(allowMenuSwitch && midiOutDeviceNames.size() > 0 ? 1 : 0, sendNotification);
 }
@@ -463,7 +463,7 @@ SynthModel MainComponent::getCurrentSynthModel() const {
 void MainComponent::createLabel(Label& label, Component& parent, const String& text, const int x, const int y, const int width, const int height, const Colour& colour,
                                 const Font& font) {
     label.setBounds(x, y, width, height);
-    label.setText(text, NO);
+    label.setText(text, NO_NOTIF);
     label.setFont(font);
     if (colour != Colour())
         label.setColour(Label::textColourId, colour);
@@ -473,10 +473,10 @@ void MainComponent::createLabel(Label& label, Component& parent, const String& t
 void MainComponent::createComboBox(ComboBox& comboBox, Component& parent, const int x, const int y, const int width, const int height, const String& tooltip,
                                    const std::function<DeviceResponse()>& onChangeFunc, const StringArray& items) {
     comboBox.addItemList(items, 1);
-    comboBox.setSelectedItemIndex(0, NO);
+    comboBox.setSelectedItemIndex(0, NO_NOTIF);
     comboBox.setBounds(x, y, width, height);
     comboBox.setTooltip(tooltip);
-    comboBox.setText("", NO);
+    comboBox.setText("", NO_NOTIF);
     parent.addAndMakeVisible(comboBox);
     comboBox.onChange = [this, onChangeFunc] { displayControlOnChange(onChangeFunc); };
 }
