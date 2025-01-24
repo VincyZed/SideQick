@@ -32,7 +32,8 @@ class MidiSysexProcessor {
 
     DeviceResponse requestDeviceInquiry();
     MidiMessage requestProgramDump(int delay);
-    void sendProgramDump(HeapBlock<uint8_t>& progData);
+    void sendProgramDump(MemoryBlock& progData);
+    void sendSysExFile(File file);
     DeviceResponse toggleSelfOscillation(ToggleButton& selfOscButton);
     DeviceResponse changeOscWaveform(int oscNumber, int waveformIndex);
     DeviceResponse changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange);

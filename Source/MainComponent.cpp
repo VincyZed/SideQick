@@ -88,7 +88,18 @@ MainComponent::MainComponent() {
         refreshMidiDevices();
     };
     sendButton->setTooltip("Send a program, bank or sequence to the SQ-80 / ESQ-1");
-    sendButton->onClick = [this] {};
+    sendButton->onClick = [this] {
+        fileChooser = std::make_unique<FileChooser>("Select a program, bank or sequence SysEx file to send to the " + SYNTH_MODELS[getCurrentSynthModel()],
+                                                    lastFileLocation, "*.syx", true);
+        fileChooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser) {
+            auto file = chooser.getResult();
+            if (file.existsAsFile()) {
+                // Next time the file chooser is opened, it will start in the same directory
+                lastFileLocation = file.getParentDirectory();
+                midiProcessor.sendSysExFile(file);
+            }
+        });
+    };
     progSaveButton->setTooltip("Save the current program from the SQ-80 / ESQ-1:\nCtrl/Cmd: Save all programs separatly in a directory");
     progSaveButton->onClick = [this] {};
     bankSaveButton->setTooltip("Save the current bank loaded in internal memory from the SQ-80 / ESQ-1");
@@ -216,11 +227,17 @@ MainComponent::MainComponent() {
 
     addAndMakeVisible(*textureOverlay);
     addAndMakeVisible(midiControls);
+
     midiControls.addAndMakeVisible(*refreshButton);
-    midiControls.addAndMakeVisible(*sendButton);
-    midiControls.addAndMakeVisible(*progSaveButton);
-    midiControls.addAndMakeVisible(*bankSaveButton);
-    midiControls.addAndMakeVisible(*seqSaveButton);
+
+    managerControls.setBounds(0, 0, windowWidth, windowHeight);
+    managerControls.setColour(GroupComponent::outlineColourId, Colours::transparentBlack);
+
+    managerControls.addAndMakeVisible(*sendButton);
+    managerControls.addAndMakeVisible(*progSaveButton);
+    managerControls.addAndMakeVisible(*bankSaveButton);
+    managerControls.addAndMakeVisible(*seqSaveButton);
+    addAndMakeVisible(managerControls);
 
     setSize(windowWidth, windowHeight);
 
@@ -330,6 +347,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
     auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
         midiControls.setEnabled(midiControlsEnabled);
         programControls.setEnabled(programControlsEnabled);
+        managerControls.setEnabled(programControlsEnabled);
         display.toggleProgramSection(programSectionOn ? ON : OFF);
         disconnectedUnderline.setVisible(status == STATUS_MESSAGES[DISCONNECTED]);
         sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
@@ -339,7 +357,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
     if (response.status == STATUS_MESSAGES[CONNECTED]) {
 
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
-            modelLabel.setText(SYNTH_MODELS[response.model], NO_NOTIF);
+            modelLabel.setText(SYNTH_MODELS_DISPLAY[response.model], NO_NOTIF);
             osVersion[MAJOR] = response.osVersion[MAJOR];
             osVersion[MINOR] = response.osVersion[MINOR];
         }
@@ -396,7 +414,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
     } else if (response.status == STATUS_MESSAGES[SYSEX_DISABLED]) {
         updateStatusLabel(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", false);
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
-            modelLabel.setText(SYNTH_MODELS[response.model], NO_NOTIF);
+            modelLabel.setText(SYNTH_MODELS_DISPLAY[response.model], NO_NOTIF);
             currentModel = getCurrentSynthModel();
             if (selectedThemeOption == AUTOMATIC_THEME)
                 repaint();
@@ -469,13 +487,13 @@ void MainComponent::timerCallback() {
 SynthModel MainComponent::getCurrentSynthModel() const {
     // Yes, I use the label text to keep track of the current synth model. This is really hacky but
     // it works for now with multithreading. PRs are welcome :)
-    if (modelLabel.getText() == SYNTH_MODELS[SQ80])
+    if (modelLabel.getText() == SYNTH_MODELS_DISPLAY[SQ80])
         return SQ80;
-    else if (modelLabel.getText() == SYNTH_MODELS[ESQ1])
+    else if (modelLabel.getText() == SYNTH_MODELS_DISPLAY[ESQ1])
         return ESQ1;
-    else if (modelLabel.getText() == SYNTH_MODELS[ESQM])
+    else if (modelLabel.getText() == SYNTH_MODELS_DISPLAY[ESQM])
         return ESQM;
-    else if (modelLabel.getText() == SYNTH_MODELS[SQ80M])
+    else if (modelLabel.getText() == SYNTH_MODELS_DISPLAY[SQ80M])
         return SQ80M;
     else
         return UNKNOWN;

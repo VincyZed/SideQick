@@ -78,6 +78,9 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
 
     NotificationType NO_NOTIF = NotificationType::dontSendNotification;
 
+    std::unique_ptr<FileChooser> fileChooser;
+    File lastFileLocation = File::getSpecialLocation(File::userHomeDirectory);
+
     std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
     Logo logo;
     std::unique_ptr<TooltipWindow> tooltipWindow;
@@ -172,6 +175,8 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     GroupComponent programControls;
     // The top row of the display
     GroupComponent statusSection;
+    // The buttons for the patch management
+    GroupComponent managerControls;
 
     StringArray waveMenuOpts;
     ComboBox waveMenus[3];
