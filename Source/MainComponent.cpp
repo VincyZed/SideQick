@@ -37,7 +37,14 @@ void PlasticTexture::resized() {
 }
 
 //==============================================================================
-MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSynthModel()], "Refresh", 640, 130), currentModel(UNKNOWN), tooltipWindow(this, 1500) {
+MainComponent::MainComponent() {
+    tooltipWindow = std::make_unique<TooltipWindow>(this, 1500);
+    currentModel = UNKNOWN;
+    refreshButton = std::make_unique<PannelButton>(REFRESH_BUTTON_COLOURS[getCurrentSynthModel()], "Refresh", 640, 130);
+    sendButton = std::make_unique<PannelButton>(SEND_BUTTON_COLOURS[getCurrentSynthModel()], "Send...", 150, 410);
+    progSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Prog \u00B7 As...", 313, 410);
+    bankSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Bank \u00B7 As...", 477, 410);
+    seqSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Seq \u00B7 As...", 640, 410);
 
     // Set the look and feel, plastic texture and logo
 
@@ -75,11 +82,19 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
     createLabel(modelLabel, statusSection, "", 580, 5, 300, 30);
     sysexDisabledUnderline.setVisible(false);
 
-    refreshButton.setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1 and for MIDI device changes");
-    refreshButton.onClick = [this] {
+    refreshButton->setTooltip("Scan for a connected Ensoniq SQ-80 or ESQ-1 and for MIDI device changes");
+    refreshButton->onClick = [this] {
         attemptConnection();
         refreshMidiDevices();
     };
+    sendButton->setTooltip("Send a program, bank or sequence to the SQ-80 / ESQ-1");
+    sendButton->onClick = [this] {};
+    progSaveButton->setTooltip("Save the current program from the SQ-80 / ESQ-1:\nCtrl/Cmd: Save all programs separatly in a directory");
+    progSaveButton->onClick = [this] {};
+    bankSaveButton->setTooltip("Save the current bank loaded in internal memory from the SQ-80 / ESQ-1");
+    bankSaveButton->onClick = [this] {};
+    seqSaveButton->setTooltip("Save the current sequence from the SQ-80 / ESQ-1:\nCtrl/Cmd: Save all sequences and sequencer data in a single file");
+    seqSaveButton->onClick = [this] {};
 
     // ========================== MIDI Options ==========================
 
@@ -201,7 +216,11 @@ MainComponent::MainComponent() : refreshButton(refreshButtonColours[getCurrentSy
 
     addAndMakeVisible(*textureOverlay);
     addAndMakeVisible(midiControls);
-    midiControls.addAndMakeVisible(refreshButton);
+    midiControls.addAndMakeVisible(*refreshButton);
+    midiControls.addAndMakeVisible(*sendButton);
+    midiControls.addAndMakeVisible(*progSaveButton);
+    midiControls.addAndMakeVisible(*bankSaveButton);
+    midiControls.addAndMakeVisible(*seqSaveButton);
 
     setSize(windowWidth, windowHeight);
 
@@ -226,25 +245,27 @@ void MainComponent::releaseResources() {}
 
 void MainComponent::paint(Graphics& g) {
 
-    refreshButton.changeColour(refreshButtonColours[selectedThemeOption == AUTOMATIC_THEME ? currentModel
-                                                    : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
-                                                                                           : selectedThemeOption - 1]);
-
+    refreshButton->changeColour(REFRESH_BUTTON_COLOURS[selectedThemeOption == AUTOMATIC_THEME ? currentModel
+                                                       : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                              : selectedThemeOption - 1]);
+    sendButton->changeColour(SEND_BUTTON_COLOURS[selectedThemeOption == AUTOMATIC_THEME ? currentModel
+                                                 : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                        : selectedThemeOption - 1]);
     Colour gradientColours[2];
     for (int i = 0; i < 2; i++) {
-        gradientColours[i] = backgroundColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
-                                               : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
-                                                                                      : selectedThemeOption - 1][i];
+        gradientColours[i] = BACKGROUND_COLOURS[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                                                : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                                       : selectedThemeOption - 1][i];
     }
 
     g.setGradientFill(ColourGradient(gradientColours[0], 0, 0, gradientColours[1], (float)(windowWidth / 2), (float)windowHeight, true));
     g.fillAll();
 
     // Top red line
-    g.setColour(accentColours[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
-                              : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
-                                                                     : selectedThemeOption - 1]);
-    g.drawLine(0, 0, (float)windowWidth, 0, (float)(separatorThickness * 1.5));
+    g.setColour(ACCENT_COLOURS[selectedThemeOption == AUTOMATIC_THEME ? getCurrentSynthModel()
+                               : selectedThemeOption == NEUTRAL_THEME ? UNKNOWN
+                                                                      : selectedThemeOption - 1]);
+    g.drawLine(0, 0, (float)windowWidth, 0, (float)(SEPARATOR_WIDTH * 1.5));
 
     // Thin red lines under logo
     g.drawLine(25, 105, 345, 105);
@@ -254,7 +275,7 @@ void MainComponent::paint(Graphics& g) {
 
     // Top seperator line
     g.setColour(Colour::fromRGB(150, 150, 150));
-    g.drawLine(370, 20, 370, 170, separatorThickness);
+    g.drawLine(370, 20, 370, 170, SEPARATOR_WIDTH);
 }
 
 void MainComponent::resized() {}
@@ -356,7 +377,7 @@ void MainComponent::updateStatus(DeviceResponse response) {
         }
 
         auto parameterValues = ProgramParser(response.currentProgram, currentModel);
-        // Update the options in the display from the current program
+        // Update the display options according to current program values
         for (int osc = 0; osc < 3; osc++) {
             waveMenus[osc].setSelectedItemIndex(parameterValues.currentWave[osc], NO_NOTIF);
             octMenus[osc].setSelectedItemIndex(parameterValues.currentOct[osc], NO_NOTIF);
@@ -405,7 +426,7 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
     midiOutDeviceNames.clear();
     // Check for MIDI input devices and populate the combo box
     for (auto& device : MidiInput::getAvailableDevices()) {
-        if (!ignoredMidiDevices.contains(device.name))
+        if (!IGNORED_MIDI_DEVICES.contains(device.name))
             midiInDeviceNames.add(device.name);
     }
 
@@ -423,7 +444,7 @@ void MainComponent::refreshMidiDevices(bool allowMenuSwitch) {
 
     // Check for MIDI output devices and populate the combo box
     for (auto& device : MidiOutput::getAvailableDevices()) {
-        if (!ignoredMidiDevices.contains(device.name))
+        if (!IGNORED_MIDI_DEVICES.contains(device.name))
             midiOutDeviceNames.add(device.name);
     }
     currentDevice = midiOutMenu.getText();
