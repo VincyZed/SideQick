@@ -25,18 +25,19 @@ void MidiSysexProcessor::processIncomingMidiData(MidiInput* source, const MidiMe
         receivedSysExMessages.add(message);
 }
 
-String MidiSysexProcessor::getChannel() { return String(requestPgmDumpMsg[CHANNEL_IDX] + 1); }
+String MidiSysexProcessor::getChannel() { return String(requestDumpMsgs[PROG][CHANNEL_IDX] + 1); }
 
 void MidiSysexProcessor::setChannel(int channel) {
+    for (int i = 0; i < 4; i++)
+        requestDumpMsgs[i][CHANNEL_IDX] = static_cast<unsigned char>(channel);
     intButtonMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
-    requestPgmDumpMsg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
     sb5Msg[CHANNEL_IDX] = static_cast<unsigned char>(channel);
 }
 
 DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
     if (selectedMidiOut != nullptr) {
         selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(REQUEST_ID_MSG, sizeof(REQUEST_ID_MSG)));
-        Thread::sleep(SYSEX_DELAY);
+        Thread::sleep(SYSEX_DELAY[PROG]);
 
         // There may be more than one device that responds to the DeviceInquiry request, since it's part of the MIDI standard.
         // We need to get all the responses and check if any of them are from an SQ-80/ESQ-1 family of synths.
@@ -68,10 +69,10 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         return DeviceResponse(STATUS_MESSAGES[REFRESHING], NO_PROG);
 }
 
-MidiMessage MidiSysexProcessor::requestProgramDump(int delay) {
+MidiMessage MidiSysexProcessor::requestDump(SYX_TYPE type, int delay) {
     // Send the program dump request
     if (selectedMidiOut != nullptr) {
-        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(requestPgmDumpMsg, sizeof(requestPgmDumpMsg)));
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(requestDumpMsgs[type], sizeof(requestDumpMsgs[type])));
     }
 
     Thread::sleep(delay);
@@ -85,38 +86,40 @@ MidiMessage MidiSysexProcessor::requestProgramDump(int delay) {
     return program;
 }
 
-void MidiSysexProcessor::sendProgramDump(MemoryBlock& progData) {
+void MidiSysexProcessor::sendSysEx(const MemoryBlock& sysExData, bool sendSb5, int delay) {
     selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(intButtonMsg, sizeof(intButtonMsg)));
-    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(progData.getData(), progData.getSize()));
-    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sb5Msg, sizeof(sb5Msg)));
+    selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sysExData.getData(), sysExData.getSize()));
+    Thread::sleep(SYSEX_DELAY[delay]);
+    if (sendSb5)
+        selectedMidiOut->sendMessageNow(MidiMessage::createSysExMessage(sb5Msg, sizeof(sb5Msg)));
 }
 
-void MidiSysexProcessor::sendSysExFile(File file) {
-    if (selectedMidiOut != nullptr) {
-        FileInputStream fileStream(file);
-        if (fileStream.openedOk()) {
-            MemoryBlock fileData;
-            fileStream.readIntoMemoryBlock(fileData);
-            // Remove the SysEx header and footer
-            fileData.removeSection(0, 1);
-            fileData.removeSection(fileData.getSize() - 1, 1);
-            sendProgramDump(fileData);
-        }
-    }
-}
+// void MidiSysexProcessor::sendSysExFile(File file) {
+//     if (selectedMidiOut != nullptr) {
+//         FileInputStream fileStream(file);
+//         if (fileStream.openedOk()) {
+//             MemoryBlock fileData;
+//             fileStream.readIntoMemoryBlock(fileData);
+//             // Remove the SysEx header and footer
+//             fileData.removeSection(0, 1);
+//             fileData.removeSection(fileData.getSize() - 1, 1);
+//             // Send the SysEx message and press the sb5 button after if it's a program
+//             sendSysEx(fileData, fileData.getSize() == SQ_ESQ_DUMP_SIZES[PROG]);
+//         }
+//     }
+// }
 
 DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessage) {
-
-    MidiMessage currentProg = requestProgramDump(SYSEX_DELAY);
+    MidiMessage currentProg = requestDump();
     bool receivedValidDeviceId = deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE;
-    bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+    bool receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG];
 
     // This is to set the right MIDI channel for the ESQ-1 with OS < 3.00
     if (!receivedValidDeviceId && !receivedValidProgram) {
         for (int channel = 0; channel < 16 && !receivedValidProgram; channel++) {
             setChannel(channel);
-            currentProg = requestProgramDump(SYSEX_DELAY / 4);
-            receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE;
+            currentProg = requestDump(PROG, SYSEX_DELAY[PROG] / 4);
+            receivedValidProgram = currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG];
         }
     }
 
@@ -132,37 +135,36 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
 }
 
 DeviceResponse MidiSysexProcessor::changeOscWaveform(int oscNumber, int waveformIndex) {
-    auto currentProg = requestProgramDump(SYSEX_DELAY);
+    auto currentProg = requestDump();
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
-    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE) {
+    if (currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG]) {
         // Make a copy of the program data to modify
-        MemoryBlock modifiedProgData(progData, SQ_ESQ_PROG_SIZE);
+        MemoryBlock modifiedProgData(progData, SQ_ESQ_DUMP_SIZES[PROG]);
 
         // Modify the appropriate nibbles to change the oscillator waveform
         modifiedProgData[ProgramParser::WAVE[oscNumber][0]] = waveformIndex % 16;
         modifiedProgData[ProgramParser::WAVE[oscNumber][1]] = static_cast<uint8_t>(waveformIndex / 16);
 
         // Send the modified program dump by passing a reference to the modifiedprogData
-        sendProgramDump(modifiedProgData);
+        sendSysEx(modifiedProgData);
 
         // Update the program that will be sent back to the updateStatus method
-        MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_PROG_SIZE);
+        MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_DUMP_SIZES[PROG]);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProg);
     } else
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
 }
 
 DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int semitone, bool inLowFreqRange) {
-
-    auto currentProg = requestProgramDump(SYSEX_DELAY);
+    auto currentProg = requestDump();
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
-    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE) {
+    if (currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG]) {
         // Make a copy of the program data to modify
-        MemoryBlock modifiedProgData(progData, SQ_ESQ_PROG_SIZE);
+        MemoryBlock modifiedProgData(progData, SQ_ESQ_DUMP_SIZES[PROG]);
 
         // If we are going to be in illegal range
         if (octave - 5 > 0 || inLowFreqRange) {
@@ -199,10 +201,10 @@ DeviceResponse MidiSysexProcessor::changeOscPitch(int oscNumber, int octave, int
         }
 
         // Send the modified program dump by passing a reference to the modifiedprogData
-        sendProgramDump(modifiedProgData);
+        sendSysEx(modifiedProgData);
 
         // Update the program that will be sent back to the updateStatus method
-        MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_PROG_SIZE);
+        MidiMessage modifiedProg = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_DUMP_SIZES[PROG]);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProg);
     } else
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
@@ -213,13 +215,13 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lo
     // It sets the oscillator in a different frequency range, a bit like what toggleSelfOscillation() does for resonance.
     // Here we set it to OCT-2 by default because OCT-3 is still a very high frequency but from a different waveform, because... reasons.
 
-    auto currentProg = requestProgramDump(SYSEX_DELAY);
+    auto currentProg = requestDump();
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
-    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE) {
+    if (currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG]) {
         // // Make a copy of the program data to modify
-        MemoryBlock modifiedProgData(progData, SQ_ESQ_PROG_SIZE);
+        MemoryBlock modifiedProgData(progData, SQ_ESQ_DUMP_SIZES[PROG]);
 
         if (lowFreqEnabled) {
             // Save the pitch values for the normal range if we were already in the normal range
@@ -242,23 +244,23 @@ DeviceResponse MidiSysexProcessor::toggleLowFrequencyMode(int oscNumber, bool lo
         }
 
         // Send the modified program dump by passing a reference to the modifiedProgData
-        sendProgramDump(modifiedProgData);
+        sendSysEx(modifiedProgData);
 
         // Update the program that will be sent back to the updateStatus method
-        MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_PROG_SIZE);
+        MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_DUMP_SIZES[PROG]);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProgram);
     } else
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);
 }
 
 DeviceResponse MidiSysexProcessor::toggleSelfOscillation(ToggleButton& selfOscButton) {
-    auto currentProg = requestProgramDump(SYSEX_DELAY);
+    auto currentProg = requestDump();
     const uint8_t* progData = currentProg.getSysExData();
 
     // Check if we received a valid program dump from the synth
-    if (currentProg.getSysExDataSize() == SQ_ESQ_PROG_SIZE) {
+    if (currentProg.getSysExDataSize() == SQ_ESQ_DUMP_SIZES[PROG]) {
         // Make a copy of the program data to modify (modified program data)
-        MemoryBlock modifiedProgData(progData, SQ_ESQ_PROG_SIZE);
+        MemoryBlock modifiedProgData(progData, SQ_ESQ_DUMP_SIZES[PROG]);
 
         if (selfOscButton.getToggleState()) {
             // Save the resonance value for the normal state
@@ -279,10 +281,10 @@ DeviceResponse MidiSysexProcessor::toggleSelfOscillation(ToggleButton& selfOscBu
         }
 
         // Send the modified program dump by passing a reference to the modifiedprogData
-        sendProgramDump(modifiedProgData);
+        sendSysEx(modifiedProgData);
 
         // Update the program that will be sent back to the updateStatus method
-        MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_PROG_SIZE);
+        MidiMessage modifiedProgram = MidiMessage::createSysExMessage(modifiedProgData.getData(), SQ_ESQ_DUMP_SIZES[PROG]);
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], modifiedProgram);
     } else {
         return DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG);

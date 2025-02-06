@@ -17,8 +17,32 @@
 
 using namespace juce;
 
-enum Status { CONNECTED, DISCONNECTED, SYSEX_DISABLED, MODIFYING_PROGRAM, REFRESHING };
-const StringArray STATUS_MESSAGES = {"Connected", "Di5connected", "5y5ex    Di5abled", "Modifying    Program    .    .    .", "Refre5hing    .    .    ."};
+enum Status {
+    CONNECTED,
+    DISCONNECTED,
+    SYSEX_DISABLED,
+    MODIFYING_PROGRAM,
+    REFRESHING,
+    SENDING_PROGRAM,
+    SENDING_BANK,
+    SENDING_SEQUENCE,
+    SENDING_SEQUENCES,
+    SAVING_PROGRAM,
+    SAVING_BANK,
+    SAVING_SEQUENCE
+};
+const StringArray STATUS_MESSAGES = {"Connected",
+                                     "Di5connected",
+                                     "5y5ex    Di5abled",
+                                     "Modifying    Program    .    .    .",
+                                     "Refre5hing    .    .    .",
+                                     "5ending    program    .    .    .",
+                                     "5ending    bank    .    .    .",
+                                     "5ending    5equence    .    .    .",
+                                     "5ending    5equence5    .    .    .",
+                                     "5aving    program    .    .    .",
+                                     "5aving    bank    .    .    .",
+                                     "5aving    5equence    .    .    ."};
 enum SynthModel { SQ80, ESQ1, ESQM, SQ80M, UNKNOWN, UNCHANGED };
 const StringArray SYNTH_MODELS_DISPLAY = {"5Q-80", "E5Q-1", "E5Q-M", "5Q80M", "Unknown", "Unchanged"};
 const StringArray SYNTH_MODELS = {"SQ-80", "ESQ-1", "ESQ-M", "SQ-80M", "Unknown", "Unchanged"};

@@ -42,9 +42,9 @@ MainComponent::MainComponent() {
     currentModel = UNKNOWN;
     refreshButton = std::make_unique<PannelButton>(REFRESH_BUTTON_COLOURS[getCurrentSynthModel()], "Refresh", 640, 130);
     sendButton = std::make_unique<PannelButton>(SEND_BUTTON_COLOURS[getCurrentSynthModel()], "Send...", 150, 410);
-    progSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Prog \u00B7 As...", 313, 410);
-    bankSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Bank \u00B7 As...", 477, 410);
-    seqSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, "Save Seq \u00B7 As...", 640, 410);
+    progSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, CharPointer_UTF8("Save Prog \xe2\x80\xa2 As..."), 313, 410);
+    bankSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, CharPointer_UTF8("Save Bank \xe2\x80\xa2 As..."), 477, 410);
+    seqSaveButton = std::make_unique<PannelButton>(SAVE_BUTTON_COLOUR, CharPointer_UTF8("Save Seq \xe2\x80\xa2 As..."), 640, 410);
 
     // Set the look and feel, plastic texture and logo
 
@@ -96,15 +96,41 @@ MainComponent::MainComponent() {
             if (file.existsAsFile()) {
                 // Next time the file chooser is opened, it will start in the same directory
                 lastFileLocation = file.getParentDirectory();
-                midiProcessor.sendSysExFile(file);
+                FileInputStream fileStream(file);
+                if (fileStream.openedOk() && midiProcessor.selectedMidiOut != nullptr) {
+                    MemoryBlock fileData;
+                    fileStream.readIntoMemoryBlock(fileData);
+                    // Remove the SysEx start and end nibbles
+                    fileData.removeSection(0, 1);
+                    fileData.removeSection(fileData.getSize() - 1, 1);
+
+                    int fileSize = fileData.getSize();
+                    // TODO: Compare the header instead of the size to determine the type of SysEx file
+                    SYX_TYPE syxType = fileSize == SQ_ESQ_DUMP_SIZES[PROG]      ? PROG
+                                       : fileSize == SQ_ESQ_DUMP_SIZES[BANK]    ? BANK
+                                       : fileSize == SQ_ESQ_DUMP_SIZES[ONE_SEQ] ? ONE_SEQ
+                                                                                : ALL_SEQ;
+
+                    updateStatus(DeviceResponse(STATUS_MESSAGES[SENDING_PROGRAM + syxType], NO_PROG));
+                    // Start a thread to send the SysEx file
+                    Thread::launch([this, fileData, fileSize, syxType] {
+                        midiProcessor.sendSysEx(fileData, fileSize == SQ_ESQ_DUMP_SIZES[PROG], midiProcessor.SYSEX_DELAY[syxType]);
+                        MessageManager::callAsync([this, fileData, fileSize] {
+                            // Assume we are still connected after sending the file
+                            updateStatus(DeviceResponse(STATUS_MESSAGES[CONNECTED], MidiMessage::createSysExMessage(fileData.getData(), fileSize)));
+                        });
+                    });
+
+                } else
+                    updateStatus(DeviceResponse(STATUS_MESSAGES[DISCONNECTED], NO_PROG));
             }
         });
     };
-    progSaveButton->setTooltip("Save the current program from the SQ-80 / ESQ-1:\nCtrl/Cmd: Save all programs separatly in a directory");
+    progSaveButton->setTooltip("Save the current program from the SQ-80 / ESQ-1.\nCtrl/Cmd: Save all programs separatly in a directory");
     progSaveButton->onClick = [this] {};
     bankSaveButton->setTooltip("Save the current bank loaded in internal memory from the SQ-80 / ESQ-1");
     bankSaveButton->onClick = [this] {};
-    seqSaveButton->setTooltip("Save the current sequence from the SQ-80 / ESQ-1:\nCtrl/Cmd: Save all sequences and sequencer data in a single file");
+    seqSaveButton->setTooltip("Save the current sequence from the SQ-80 / ESQ-1.\nCtrl/Cmd: Save all sequences and sequencer data in a single file");
     seqSaveButton->onClick = [this] {};
 
     // ========================== MIDI Options ==========================
@@ -344,11 +370,12 @@ void MainComponent::updateStatus(DeviceResponse response) {
                              modelLabel.getHeight());
         modelLabel.setTooltip("MIDI channel: " + midiProcessor.getChannel() + "\nSystem version: " + osVersion[MAJOR] + "." + osVersion[MINOR]);
     };
-    auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled, bool programSectionOn) {
+    auto setGroupComponents = [this](String& status, bool midiControlsEnabled, bool programControlsEnabled) {
         midiControls.setEnabled(midiControlsEnabled);
         programControls.setEnabled(programControlsEnabled);
-        managerControls.setEnabled(programControlsEnabled);
-        display.toggleProgramSection(programSectionOn ? ON : OFF);
+        // managerControls.setEnabled(programControlsEnabled);
+        managerControls.setEnabled(true);
+        display.toggleProgramSection(programControlsEnabled ? ON : OFF);
         disconnectedUnderline.setVisible(status == STATUS_MESSAGES[DISCONNECTED]);
         sysexDisabledUnderline.setVisible(status == STATUS_MESSAGES[SYSEX_DISABLED]);
     };
@@ -405,12 +432,12 @@ void MainComponent::updateStatus(DeviceResponse response) {
         selfOscButton.setToggleState(parameterValues.currentSelfOsc, NO_NOTIF);
 
         updateStatusLabel(STATUS_MESSAGES[CONNECTED] + "    to    ", false);
-        setGroupComponents(response.status, true, true, true);
+        setGroupComponents(response.status, true, true);
 
     } else if (response.status == STATUS_MESSAGES[DISCONNECTED]) {
         updateStatusLabel(STATUS_MESSAGES[DISCONNECTED], true);
         programNameLabel.setText("______", NO_NOTIF);
-        setGroupComponents(response.status, true, false, false);
+        setGroupComponents(response.status, true, false);
     } else if (response.status == STATUS_MESSAGES[SYSEX_DISABLED]) {
         updateStatusLabel(STATUS_MESSAGES[SYSEX_DISABLED] + "    on    ", false);
         if (response.model != UNCHANGED && response.model != UNKNOWN) {
@@ -419,10 +446,10 @@ void MainComponent::updateStatus(DeviceResponse response) {
             if (selectedThemeOption == AUTOMATIC_THEME)
                 repaint();
         }
-        setGroupComponents(response.status, true, false, false);
-    } else if (response.status == STATUS_MESSAGES[MODIFYING_PROGRAM] || response.status == STATUS_MESSAGES[REFRESHING]) {
+        setGroupComponents(response.status, true, false);
+    } else {
         updateStatusLabel(response.status, response.status == STATUS_MESSAGES[REFRESHING]);
-        setGroupComponents(response.status, false, false, false);
+        setGroupComponents(response.status, false, false);
     }
 
     updateModelLabel(response);
