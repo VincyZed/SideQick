@@ -20,7 +20,7 @@ using namespace juce;
 
 class PannelButton : public ShapeButton {
   public:
-    NotificationType NO = NotificationType::dontSendNotification;
+    NotificationType NO_NOTIF = NotificationType::dontSendNotification;
 
     float buttonWidth = 40.0f;
     float buttonHeight = 25.0f;

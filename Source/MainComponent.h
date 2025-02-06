@@ -76,7 +76,7 @@ class MainComponent : public AudioAppComponent, public MidiInputCallback, public
     unsigned int displayWidth = 780;
     unsigned int displayHeight = 200;
 
-    NotificationType NO = NotificationType::dontSendNotification;
+    NotificationType NO_NOTIF = NotificationType::dontSendNotification;
 
     std::unique_ptr<DisplayLookAndFeel> lookAndFeel;
     Logo logo;
