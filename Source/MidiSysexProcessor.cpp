@@ -48,7 +48,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
         for (auto deviceIdMessage : deviceIdMessages) {
             if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE) {
                 const uint8_t* deviceIdData = deviceIdMessage.getSysExData();
-                if (deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
+                if (deviceIdData[MANUFACTURER_IDX] == ENSONIQ_MANUFACTURER_ID && deviceIdData[FAMILY_IDX] == SQ_ESQ_FAMILY_ID) {
                     setChannel(deviceIdData[RESPONSE_CHANNEL_IDX]);
 
                     // If we find an ESQ-1, we don't need to check for others because the ESQ-1 has the most hidden waves.
@@ -61,7 +61,7 @@ DeviceResponse MidiSysexProcessor::requestDeviceInquiry() {
             }
         }
         // This will pass an empty message if we don't find any SQ-80/ESQ-1 that responded to the DeviceInquiry request
-        return getConnectionStatus(sqEsqMessages.getFirst());
+        return getConnectionStatus(sqEsqMessages.getLast());
 
     } else
         // On launch, the program will try to connect to the synth automatically, so this displays the "refreshing" message
@@ -111,7 +111,7 @@ DeviceResponse MidiSysexProcessor::getConnectionStatus(MidiMessage deviceIdMessa
     if (receivedValidProgram)
         return DeviceResponse(STATUS_MESSAGES[CONNECTED], deviceIdMessage, currentProg);
     else {
-        if (deviceIdMessage.getSysExDataSize() == DEVICE_ID_SIZE)
+        if (receivedValidDeviceId)
             return DeviceResponse(STATUS_MESSAGES[SYSEX_DISABLED], deviceIdMessage, currentProg);
         else
             // This will be the response for ESQ-1s with OS < 3.00 which are connected correctly but with SysEx disabled

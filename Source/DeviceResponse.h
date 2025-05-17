@@ -23,6 +23,8 @@ enum SynthModel { SQ80, ESQ1, ESQM, SQ80M, UNKNOWN, UNCHANGED };
 const StringArray SYNTH_MODELS = {"5Q-80", "E5Q-1", "E5Q-M", "5Q80M", "Unknown", "Unchanged"};
 const unsigned int NB_OF_WAVES[4] = {75, 32, 32, 75};
 
+const int ENSONIQ_MANUFACTURER_ID = 0x0F;
+
 const int SQ_ESQ_FAMILY_ID = 0x02;
 // Model codes. The SQ-80M has the same code as the ESQ-M
 const int ESQ1_ID = 0x01;
@@ -34,6 +36,7 @@ const int DEVICE_ID_SIZE = 15 - 2;
 
 // Indexes for corresponding nibbles in the SysEx message, we subtracted 1 for all of these to remove the SysEx header
 const int RESPONSE_CHANNEL_IDX = 1;
+const int MANUFACTURER_IDX = 4;
 const int FAMILY_IDX = 5;
 const int MODEL_IDX = 7;
 const int OS_VERSION_IDX[2] = {11, 12};
